@@ -13,14 +13,27 @@ const playUpwardSweep = async () => {
     console.error('Error playing sound:', error)
   }
 }
+
+// Play downward sweep sound
+const playDownwardSweep = async () => {
+  try {
+    await soundStore.playToken('s')
+    console.log('Played downward sweep')
+  } catch (error) {
+    console.error('Error playing sound:', error)
+  }
+}
 </script>
 
 <template>
   <div class="app">
     <h1>Robot Sounds Generator</h1>
-    <p>Click the button to generate an upward sweep sound</p>
+    <p>Click the buttons to generate robot sounds</p>
 
-    <button @click="playUpwardSweep">Play Upward Sweep (S)</button>
+    <div class="button-container">
+      <button @click="playUpwardSweep">Play Upward Sweep (S)</button>
+      <button @click="playDownwardSweep">Play Downward Sweep (s)</button>
+    </div>
   </div>
 </template>
 
@@ -36,6 +49,13 @@ h1 {
 
 p {
   margin-bottom: 2rem;
+}
+
+.button-container {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 button {

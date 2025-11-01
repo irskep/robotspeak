@@ -55,8 +55,57 @@ export const TOKEN_DEFINITIONS: Record<SoundToken, TokenDefinition> = {
       sound_vol: 0.5,
     },
   },
+  s: {
+    token: 's',
+    name: 'Downward Sweep',
+    params: {
+      wave_type: 1, // Sawtooth wave
+
+      // Envelope - quick attack, medium sustain
+      p_env_attack: 0.07,
+      p_env_sustain: 0.35,
+      p_env_decay: 0.07,
+      p_env_punch: 0.0,
+
+      // Frequency - start high, sweep down
+      p_base_freq: 0.5,
+      p_freq_limit: 0.0,
+      p_freq_ramp: -0.12, // Negative for downward sweep
+      p_freq_dramp: 0.0,
+
+      // No vibrato for clean sweep
+      p_vib_strength: 0.01,
+      p_vib_speed: 0.02,
+
+      // No arpeggiation
+      p_arp_mod: 0.0,
+      p_arp_speed: 0.0,
+
+      // Square wave duty
+      p_duty: 0.5,
+      p_duty_ramp: 0.0,
+
+      // No repeat
+      p_repeat_speed: 0.0,
+
+      // No phaser
+      p_pha_offset: 0.001,
+      p_pha_ramp: 0.0,
+
+      // Slight low-pass filter for warmth
+      p_lpf_freq: 0.97,
+      p_lpf_ramp: 0.0,
+      p_lpf_resonance: 0.02,
+
+      // No high-pass filter
+      p_hpf_freq: 0.005,
+      p_hpf_ramp: 0.0,
+
+      // Volume
+      sound_vol: 0.5,
+    },
+  },
   // Future tokens will be added here:
-  // s: downward sweep
   // b: short blip
   // B: long blip
   // c: low chirp

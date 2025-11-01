@@ -1,7 +1,7 @@
 import type { SynthParameters } from 'sfxr.js'
 
 // Sound token types
-export type SoundToken = 'S' // Upward sweep (more tokens to be added)
+export type SoundToken = 'S' | 's' // S = Upward sweep, s = downward sweep (more tokens to be added)
 
 // Parameter range for randomization
 export interface ParameterRange {
