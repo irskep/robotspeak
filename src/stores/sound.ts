@@ -1,17 +1,27 @@
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
 import { sfxr, Params, type SynthParameters } from 'sfxr.js'
 import type { SoundToken, TokenDefinition } from '@/types/sound'
 import { TOKEN_DEFINITIONS } from '@/modules/tokenDefinitions'
 
-class SoundEngine {
-  private audioContext: AudioContext | null = null
-  private isInitialized = false
+/**
+ * Sound store for managing audio context and sound generation
+ */
+export const useSoundStore = defineStore('sound', () => {
+  // State
+  const audioContext = ref<AudioContext | null>(null)
+  const isInitialized = ref(false)
 
+  // Getters
+  const isReady = computed(() => isInitialized.value)
+
+  // Actions
   /**
    * Initialize the audio context (required for browser audio)
    * Must be called after user interaction due to browser policies
    */
-  public async initialize(): Promise<void> {
-    if (this.isInitialized) return
+  const initialize = async (): Promise<void> => {
+    if (isInitialized.value) return
 
     try {
       const AudioContextConstructor =
@@ -20,8 +30,8 @@ class SoundEngine {
       if (!AudioContextConstructor) {
         throw new Error('Web Audio API not supported')
       }
-      this.audioContext = new AudioContextConstructor()
-      this.isInitialized = true
+      audioContext.value = new AudioContextConstructor()
+      isInitialized.value = true
       console.log('Sound engine initialized')
     } catch (error) {
       console.error('Failed to initialize audio context:', error)
@@ -32,10 +42,10 @@ class SoundEngine {
   /**
    * Play a sound based on a token
    */
-  public async playToken(token: SoundToken): Promise<void> {
+  const playToken = async (token: SoundToken): Promise<void> => {
     // Auto-initialize on first play attempt
-    if (!this.isInitialized) {
-      await this.initialize()
+    if (!isInitialized.value) {
+      await initialize()
     }
 
     const definition = TOKEN_DEFINITIONS[token]
@@ -45,7 +55,7 @@ class SoundEngine {
     }
 
     try {
-      await this.playSoundWithParams(definition.params)
+      await playSoundWithParams(definition.params)
     } catch (error) {
       console.error(`Failed to play token ${token}:`, error)
       throw error
@@ -55,8 +65,8 @@ class SoundEngine {
   /**
    * Play a sound with specific parameters
    */
-  private async playSoundWithParams(params: Partial<SynthParameters>): Promise<void> {
-    if (!this.audioContext) {
+  const playSoundWithParams = async (params: Partial<SynthParameters>): Promise<void> => {
+    if (!audioContext.value) {
       throw new Error('Audio context not initialized')
     }
 
@@ -68,11 +78,11 @@ class SoundEngine {
       Object.assign(sfxrParams, params)
 
       // Use sfxr's toWebAudio helper to create an AudioBufferSourceNode
-      const source = sfxr.toWebAudio(sfxrParams, this.audioContext)
+      const source = sfxr.toWebAudio(sfxrParams, audioContext.value)
 
       if (source) {
         // Connect the source to the audio context's destination
-        source.connect(this.audioContext.destination)
+        source.connect(audioContext.value.destination)
         // Start playing the sound
         source.start(0)
       }
@@ -86,7 +96,10 @@ class SoundEngine {
    * Generate a random variation of a token's parameters
    * (for future use when we want slight variations)
    */
-  public getTokenVariation(token: SoundToken, _variationAmount = 0.1): Partial<SynthParameters> {
+  const getTokenVariation = (
+    token: SoundToken,
+    _variationAmount = 0.1,
+  ): Partial<SynthParameters> => {
     const baseParams = TOKEN_DEFINITIONS[token]?.params
     if (!baseParams) {
       throw new Error(`Unknown token: ${token}`)
@@ -100,20 +113,23 @@ class SoundEngine {
   /**
    * Get information about a token
    */
-  public getTokenInfo(token: SoundToken): TokenDefinition | undefined {
+  const getTokenInfo = (token: SoundToken): TokenDefinition | undefined => {
     return TOKEN_DEFINITIONS[token]
   }
 
-  /**
-   * Check if sound engine is ready
-   */
-  public get isReady(): boolean {
-    return this.isInitialized
+  return {
+    // State (exposed as refs)
+    audioContext,
+    isInitialized,
+
+    // Getters
+    isReady,
+
+    // Actions
+    initialize,
+    playToken,
+    playSoundWithParams,
+    getTokenVariation,
+    getTokenInfo,
   }
-}
-
-// Export singleton instance
-export const soundEngine = new SoundEngine()
-
-// Export for testing or multiple instances
-export { SoundEngine }
+})

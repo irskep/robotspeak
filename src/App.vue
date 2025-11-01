@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { soundEngine } from '@/modules/soundEngine'
+import { useSoundStore } from '@/stores/sound'
+
+// Get sound store instance
+const soundStore = useSoundStore()
 
 // Play upward sweep sound
 const playUpwardSweep = async () => {
   try {
-    await soundEngine.playToken('S')
+    await soundStore.playToken('S')
     console.log('Played upward sweep')
   } catch (error) {
     console.error('Error playing sound:', error)
