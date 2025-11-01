@@ -7,16 +7,13 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    vue(),
-    vueJsx(),
-    vueDevTools(),
-  ],
+  base: '/robotspeak/',
+  plugins: [vue(), vueJsx(), vueDevTools()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
       // Fix for sfxr.js package with incorrect exports
-      'sfxr.js': fileURLToPath(new URL('./node_modules/sfxr.js/dist/index.js', import.meta.url))
+      'sfxr.js': fileURLToPath(new URL('./node_modules/sfxr.js/dist/index.js', import.meta.url)),
     },
   },
 })
