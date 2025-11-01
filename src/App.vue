@@ -1,20 +1,26 @@
 <script setup lang="ts">
-import { useSoundStore } from '@/stores/sound'
+import { useSoundStore } from '@/stores/soundStore'
 import { ramble } from './grammars/subphrasesGrammar'
 import type { SoundToken } from './types/sound'
 import { onMounted, ref } from 'vue'
 
 // Get sound store instance
 const soundStore = useSoundStore()
-
 const canvas = ref<HTMLCanvasElement>()
+const lastSequenceAsString = ref('')
 
-onMounted(() => soundStore.initialize(canvas.value!))
+onMounted(() => {
+  canvas.value!.width = 300
+  canvas.value!.height = 150
+  soundStore.initialize(canvas.value!)
+})
 
 const playRamble = async () => {
   soundStore.waviz?.visualizer?.simpleBars()
   soundStore.waviz?.input.initializePending()
-  soundStore.playSequence(ramble())
+  const seq = ramble()
+  lastSequenceAsString.value = seq.map((w) => `${w.soundToken}${w.identifier}`).join(' ')
+  soundStore.playSequence(seq)
 }
 
 const makeTokenPlayer = (s: SoundToken) => async () => {
@@ -29,8 +35,15 @@ const makeTokenPlayer = (s: SoundToken) => async () => {
 
 <template>
   <div class="app">
-    <h1>Robot Sounds Generator</h1>
-    <p>Click the buttons to generate robot sounds</p>
+    <canvas ref="canvas"></canvas>
+
+    <div class="button-container">
+      <button @click="playRamble">Ramble</button>
+    </div>
+
+    <div>
+      <pre>{{ lastSequenceAsString || '&nbsp;' }}</pre>
+    </div>
 
     <div class="button-container">
       <button @click="makeTokenPlayer('S')">S</button>
@@ -42,12 +55,6 @@ const makeTokenPlayer = (s: SoundToken) => async () => {
       <button @click="makeTokenPlayer('w')">w</button>
       <button @click="makeTokenPlayer('z')">z</button>
     </div>
-
-    <div class="button-container">
-      <button @click="playRamble">Ramble</button>
-    </div>
-
-    <canvas ref="canvas"></canvas>
   </div>
 </template>
 
@@ -64,5 +71,12 @@ const makeTokenPlayer = (s: SoundToken) => async () => {
   gap: 1rem;
   justify-content: center;
   flex-wrap: wrap;
+}
+
+canvas {
+  image-rendering: pixelated;
+  aspect-ratio: 300 / 150;
+  width: 100%;
+  height: auto;
 }
 </style>

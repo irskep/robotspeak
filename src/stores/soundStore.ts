@@ -109,7 +109,6 @@ export const useSoundStore = defineStore('sound', () => {
   const playSequence = async (words: RobotWord[]) => {
     console.log('Playing sequence:', JSON.stringify(words))
     const playbackTokensByRobotWordId = new Map<string, PlaybackToken>()
-
     const playbackTokenSequence = new Array<PlaybackToken>()
 
     for (const word of words) {

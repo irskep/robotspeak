@@ -47,10 +47,29 @@ export function ramble(): RobotWord[] {
   const n = randint(5, 11)
   const result = new Array<RobotWord>()
 
+  const identifiersBySoundToken = new Map<SoundToken, string[]>()
+
+  function getOrCreateIdentifier(s: SoundToken): string {
+    const arr = identifiersBySoundToken.get(s) || []
+    if (arr.length >= 3) {
+      return choice(arr)
+    } else {
+      arr.push(getIdentifier())
+      identifiersBySoundToken.set(s, arr)
+      return arr[arr.length - 1]!
+    }
+  }
+
   for (let i = 0; i < n; i++) {
-    const tok = choice(ALL_TOKENS.concat(['_', '_', '_', '_', '_', '_']))
+    const opts =
+      i === 0 || i === n - 1 || (i > 0 && result[result.length - 1]?.soundToken === '_')
+        ? ALL_TOKENS.slice(0, ALL_TOKENS.length - 1)
+        : ALL_TOKENS.concat(['_', '_', '_', '_', '_', '_'])
+
+    const tok = choice(opts)
+
     if (tok === '_') {
-      result.push({ soundToken: tok, identifier: getIdentifier() })
+      result.push({ soundToken: tok, identifier: getOrCreateIdentifier(tok) })
     } else {
       result.push(...seq(tok))
     }
