@@ -11,6 +11,9 @@ importers:
       pinia:
         specifier: ^3.0.3
         version: 3.0.3(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3))
+      sfxr.js:
+        specifier: ^1.0.0
+        version: 1.0.0
       vue:
         specifier: ^3.5.22
         version: 3.5.22(typescript@5.9.3)
@@ -1491,6 +1494,10 @@ packages:
   semver@7.7.3:
     resolution: {integrity: sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q==}
     engines: {node: '>=10'}
+    hasBin: true
+
+  sfxr.js@1.0.0:
+    resolution: {integrity: sha512-RR0QyMR4S78yqmrSmJddgEAAonjq84YnBhDTEDGD9SVXYUQ4s42Xr42bEc/GXU3rBziBRuOPPg1CLwwV0jHMrQ==}
     hasBin: true
 
   shebang-command@2.0.0:
@@ -3056,6 +3063,8 @@ snapshots:
   semver@6.3.1: {}
 
   semver@7.7.3: {}
+
+  sfxr.js@1.0.0: {}
 
   shebang-command@2.0.0:
     dependencies:

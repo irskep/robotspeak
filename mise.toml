@@ -9,7 +9,7 @@ postinstall = "pnpm install"
 run = "pnpm exec vite"
 
 [tasks.build]
-run = ["typecheck", "build-only"]
+run = { tasks = ["typecheck", "build-only"] }
 
 [tasks."build-only"]
 run = "pnpm exec vite build"
@@ -27,8 +27,11 @@ run = "pnpm exec oxlint . --fix -D correctness --ignore-path .gitignore"
 run = "pnpm exec eslint . --fix --cache"
 
 [tasks.lint]
-run = ["lint:oxlint", "lint:eslint"]
+run = { tasks = ["lint:oxlint", "lint:eslint"] }
 
 [tasks.format]
 alias = "fmt"
 run = "pnpm exec prettier --write src/"
+
+[tasks.validate]
+run = [{ task = "format"}, { tasks = ["lint", "typecheck"] }]
