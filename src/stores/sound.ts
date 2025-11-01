@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, reactive } from 'vue'
 import { sfxr, Params, type SynthParameters } from 'sfxr.js'
-import type { SoundToken, TokenDefinition } from '@/types/sound'
-import { TOKEN_DEFINITIONS } from '@/modules/tokenDefinitions'
+import type { SoundToken, BakedToken } from '@/types/sound'
+import { bakeToken, getTokenRange } from '@/modules/tokenBaker'
 
 /**
  * Sound store for managing audio context and sound generation
@@ -11,6 +11,9 @@ export const useSoundStore = defineStore('sound', () => {
   // State
   const audioContext = ref<AudioContext | null>(null)
   const isInitialized = ref(false)
+
+  // Token cache - stores baked tokens for consistency within a phrase
+  const tokenCache = reactive<Map<string, BakedToken>>(new Map())
 
   // Getters
   const isReady = computed(() => isInitialized.value)
@@ -40,22 +43,29 @@ export const useSoundStore = defineStore('sound', () => {
   }
 
   /**
-   * Play a sound based on a token
+   * Play a sound based on a token (generates fresh instance)
    */
-  const playToken = async (token: SoundToken): Promise<void> => {
+  const playToken = async (token: SoundToken, useCache = false): Promise<void> => {
     // Auto-initialize on first play attempt
     if (!isInitialized.value) {
       await initialize()
     }
 
-    const definition = TOKEN_DEFINITIONS[token]
-    if (!definition) {
-      console.warn(`Unknown token: ${token}`)
-      return
+    let bakedToken: BakedToken
+
+    if (useCache && tokenCache.has(token)) {
+      // Use cached token for consistency
+      bakedToken = tokenCache.get(token)!
+    } else {
+      // Bake a fresh token instance
+      bakedToken = bakeToken(token)
+
+      // Store in cache for potential reuse
+      tokenCache.set(token, bakedToken)
     }
 
     try {
-      await playSoundWithParams(definition.params)
+      await playSoundWithParams(bakedToken.params)
     } catch (error) {
       console.error(`Failed to play token ${token}:`, error)
       throw error
@@ -93,34 +103,37 @@ export const useSoundStore = defineStore('sound', () => {
   }
 
   /**
-   * Generate a random variation of a token's parameters
-   * (for future use when we want slight variations)
+   * Clear the token cache (useful when starting a new phrase)
    */
-  const getTokenVariation = (
-    token: SoundToken,
-    _variationAmount = 0.1,
-  ): Partial<SynthParameters> => {
-    const baseParams = TOKEN_DEFINITIONS[token]?.params
-    if (!baseParams) {
-      throw new Error(`Unknown token: ${token}`)
-    }
-
-    // For now, return base params without variation
-    // In the future, we can add random variations here
-    return { ...baseParams }
+  const clearTokenCache = (): void => {
+    tokenCache.clear()
   }
 
   /**
-   * Get information about a token
+   * Get a baked token from cache or create new
    */
-  const getTokenInfo = (token: SoundToken): TokenDefinition | undefined => {
-    return TOKEN_DEFINITIONS[token]
+  const getBakedToken = (token: SoundToken, forceNew = false): BakedToken => {
+    if (!forceNew && tokenCache.has(token)) {
+      return tokenCache.get(token)!
+    }
+
+    const bakedToken = bakeToken(token)
+    tokenCache.set(token, bakedToken)
+    return bakedToken
+  }
+
+  /**
+   * Get information about a token's range
+   */
+  const getTokenInfo = (token: SoundToken) => {
+    return getTokenRange(token)
   }
 
   return {
     // State (exposed as refs)
     audioContext,
     isInitialized,
+    tokenCache,
 
     // Getters
     isReady,
@@ -129,7 +142,8 @@ export const useSoundStore = defineStore('sound', () => {
     initialize,
     playToken,
     playSoundWithParams,
-    getTokenVariation,
+    clearTokenCache,
+    getBakedToken,
     getTokenInfo,
   }
 })

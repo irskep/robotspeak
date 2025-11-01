@@ -13,14 +13,14 @@ export const TOKEN_DEFINITIONS: Record<SoundToken, TokenDefinition> = {
 
       // Envelope - quick attack, medium sustain
       p_env_attack: 0.0,
-      p_env_sustain: 0.2,
-      p_env_decay: 0.3,
-      p_env_punch: 0.3,
+      p_env_sustain: 0.15,
+      p_env_decay: 0.25,
+      p_env_punch: 0.2,
 
-      // Frequency - start low, sweep up
-      p_base_freq: 0.2,
+      // Frequency - start mid-range, sweep up by about a musical fourth/fifth
+      p_base_freq: 0.3,
       p_freq_limit: 0.0,
-      p_freq_ramp: 0.4, // Positive for upward sweep
+      p_freq_ramp: 0.08, // Much smaller ramp for controlled sweep (about a fifth)
       p_freq_dramp: 0.0,
 
       // No vibrato for clean sweep
