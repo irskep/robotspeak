@@ -1,8 +1,9 @@
+import Waviz from 'waviz/core'
 import { defineStore } from 'pinia'
-import { ref, computed, reactive } from 'vue'
+import { ref, computed } from 'vue'
 import { sfxr, Params, type SynthParameters } from 'sfxr.js'
 import type { RobotWord, SoundToken, PlaybackToken } from '@/types/sound'
-import { bakeToken, getTokenRange } from '@/modules/tokenBaker'
+import { bakeToken } from '@/modules/tokenBaker'
 
 /**
  * Sound store for managing audio context and sound generation
@@ -11,6 +12,8 @@ export const useSoundStore = defineStore('sound', () => {
   // State
   const audioContext = ref<AudioContext | null>(null)
   const isInitialized = ref(false)
+  const waviz = ref<Waviz | null>(null)
+  const mediaStreamDest = ref<MediaStreamAudioDestinationNode | null>(null)
 
   // Getters
   const isReady = computed(() => isInitialized.value)
@@ -20,7 +23,7 @@ export const useSoundStore = defineStore('sound', () => {
    * Initialize the audio context (required for browser audio)
    * Must be called after user interaction due to browser policies
    */
-  const initialize = async (): Promise<void> => {
+  const initialize = async (canvas: HTMLCanvasElement): Promise<void> => {
     if (isInitialized.value) return
 
     try {
@@ -31,6 +34,8 @@ export const useSoundStore = defineStore('sound', () => {
         throw new Error('Web Audio API not supported')
       }
       audioContext.value = new AudioContextConstructor()
+      mediaStreamDest.value = audioContext.value.createMediaStreamDestination()
+      waviz.value = new Waviz(canvas, mediaStreamDest.value.stream)
       isInitialized.value = true
       console.log('Sound engine initialized')
     } catch (error) {
@@ -49,7 +54,7 @@ export const useSoundStore = defineStore('sound', () => {
   const playPlaybackToken = async (token: PlaybackToken): Promise<void> => {
     // Auto-initialize on first play attempt
     if (!isInitialized.value) {
-      await initialize()
+      throw new Error('Not initialized')
     }
 
     if (token.kind === 'BakedToken') {
@@ -89,6 +94,7 @@ export const useSoundStore = defineStore('sound', () => {
       if (source) {
         // Connect the source to the audio context's destination
         source.connect(audioContext.value.destination)
+        if (mediaStreamDest.value) source.connect(mediaStreamDest.value)
         // Start playing the sound
         source.start(0)
 
@@ -123,6 +129,7 @@ export const useSoundStore = defineStore('sound', () => {
     // State (exposed as refs)
     audioContext,
     isInitialized,
+    waviz,
 
     // Getters
     isReady,

@@ -44,7 +44,7 @@ function seq(s: SoundToken): RobotWord[] {
 export const ALL_TOKENS: SoundToken[] = ['S', 's', 'A', 'a', 'B', 'b', 'w', 'z', '_']
 
 export function ramble(): RobotWord[] {
-  const n = randint(5, 15)
+  const n = randint(5, 11)
   const result = new Array<RobotWord>()
 
   for (let i = 0; i < n; i++) {
