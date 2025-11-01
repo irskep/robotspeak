@@ -23,7 +23,7 @@ const playRamble = async () => {
   soundStore.playSequence(seq)
 }
 
-const makeTokenPlayer = (s: SoundToken) => async () => {
+const playToken = async (s: SoundToken) => {
   try {
     await soundStore.playSoundToken(s)
     console.log(`Played ${s}`)
@@ -35,7 +35,28 @@ const makeTokenPlayer = (s: SoundToken) => async () => {
 
 <template>
   <div class="app">
-    <canvas ref="canvas"></canvas>
+    <div class="Robot">
+      <svg viewBox="-100 0 200 200">
+        <path d="M 0 50 A 80 80 0 0 130 5" stroke="blue" fill="transparent"></path>
+        <circle cx="30" cy="5" r="5" fill="blue"></circle>
+        <rect
+          x="-100"
+          y="50"
+          width="200"
+          height="150"
+          rx="10"
+          ry="10"
+          stroke-width="1"
+          stroke="blue"
+          fill="deepskyblue"
+        ></rect>
+        <circle cx="-50" cy="80" r="20" stroke="orange" fill="yellow"></circle>
+        <circle cx="50" cy="80" r="20" stroke="orange" fill="yellow"></circle>
+      </svg>
+      <div class="Robot__Mouth">
+        <canvas ref="canvas"></canvas>
+      </div>
+    </div>
 
     <div class="button-container">
       <button @click="playRamble">Ramble</button>
@@ -46,14 +67,14 @@ const makeTokenPlayer = (s: SoundToken) => async () => {
     </div>
 
     <div class="button-container">
-      <button @click="makeTokenPlayer('S')">S</button>
-      <button @click="makeTokenPlayer('s')">s</button>
-      <button @click="makeTokenPlayer('A')">A</button>
-      <button @click="makeTokenPlayer('a')">a</button>
-      <button @click="makeTokenPlayer('B')">B</button>
-      <button @click="makeTokenPlayer('b')">b</button>
-      <button @click="makeTokenPlayer('w')">w</button>
-      <button @click="makeTokenPlayer('z')">z</button>
+      <button @click="playToken('S')">S</button>
+      <button @click="playToken('s')">s</button>
+      <button @click="playToken('A')">A</button>
+      <button @click="playToken('a')">a</button>
+      <button @click="playToken('B')">B</button>
+      <button @click="playToken('b')">b</button>
+      <button @click="playToken('w')">w</button>
+      <button @click="playToken('z')">z</button>
     </div>
   </div>
 </template>
@@ -73,10 +94,29 @@ const makeTokenPlayer = (s: SoundToken) => async () => {
   flex-wrap: wrap;
 }
 
+.Robot {
+  width: 50vw;
+  position: relative;
+}
+
+.Robot__Mouth {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 10%;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
 canvas {
+  position: absolute;
+  width: 70%;
   image-rendering: pixelated;
   aspect-ratio: 300 / 150;
-  width: 100%;
-  height: auto;
+  border: 1px solid yellow;
+  background-color: darkblue;
 }
 </style>
