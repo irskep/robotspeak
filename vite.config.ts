@@ -14,7 +14,9 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      // Fix for sfxr.js package with incorrect exports
+      'sfxr.js': fileURLToPath(new URL('./node_modules/sfxr.js/dist/index.js', import.meta.url))
     },
   },
 })

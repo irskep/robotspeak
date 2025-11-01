@@ -34,4 +34,8 @@ alias = "fmt"
 run = "pnpm exec prettier --write src/"
 
 [tasks.validate]
-run = [{ task = "format"}, { tasks = ["lint", "typecheck"] }]
+run = [
+  { task = "format"},
+  { tasks = ["lint", "typecheck"] },
+  { task = "build"}
+]

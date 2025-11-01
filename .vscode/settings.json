@@ -12,5 +12,6 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "debug.javascript.defaultRuntimeExecutable": {
     "pwa-node": "/Users/steve/.local/share/mise/shims/node"
-  }
+  },
+  "oxc.enable": true
 }
