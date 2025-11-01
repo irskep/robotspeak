@@ -1,0 +1,34 @@
+[tools]
+node = "24"
+pnpm = "latest"
+
+[hooks]
+postinstall = "pnpm install"
+
+[tasks.dev]
+run = "pnpm exec vite"
+
+[tasks.build]
+run = ["typecheck", "build-only"]
+
+[tasks."build-only"]
+run = "pnpm exec vite build"
+
+[tasks.preview]
+run = "pnpm exec vite preview"
+
+[tasks.typecheck]
+run = "pnpm exec vue-tsc --build"
+
+[tasks."lint:oxlint"]
+run = "pnpm exec oxlint . --fix -D correctness --ignore-path .gitignore"
+
+[tasks."lint:eslint"]
+run = "pnpm exec eslint . --fix --cache"
+
+[tasks.lint]
+run = ["lint:oxlint", "lint:eslint"]
+
+[tasks.format]
+alias = "fmt"
+run = "pnpm exec prettier --write src/"
