@@ -3,9 +3,6 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "engines": {
-    "node": "^20.19.0 || >=22.12.0"
-  },
   "scripts": {
     "no scripts here, see mise.toml": "echo noop"
   },
@@ -18,7 +15,7 @@
   "devDependencies": {
     "@prettier/plugin-oxc": "^0.0.4",
     "@tsconfig/node22": "^22.0.2",
-    "@types/node": "^22.18.11",
+    "@types/node": "^24.9.2",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vitejs/plugin-vue-jsx": "^5.1.1",
     "@vue/eslint-config-prettier": "^10.2.0",
@@ -28,7 +25,6 @@
     "eslint-plugin-oxlint": "~1.23.0",
     "eslint-plugin-vue": "~10.5.0",
     "jiti": "^2.6.1",
-    "npm-run-all2": "^8.0.4",
     "oxlint": "~1.23.0",
     "prettier": "3.6.2",
     "typescript": "~5.9.0",
