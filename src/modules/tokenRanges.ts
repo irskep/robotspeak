@@ -4,7 +4,7 @@ import type { SoundToken, TokenRangeDefinition } from '@/types/sound'
  * Token range definitions for robot sound generation
  * Each token has parameter ranges that are randomized when baking a specific instance
  */
-export const TOKEN_RANGES: Record<SoundToken, TokenRangeDefinition> = {
+export const TOKEN_RANGES: Partial<Record<SoundToken, TokenRangeDefinition>> = {
   S: {
     token: 'S',
     name: 'Upward Sweep',
@@ -261,8 +261,160 @@ export const TOKEN_RANGES: Record<SoundToken, TokenRangeDefinition> = {
       sound_vol: { min: 0.45, max: 0.55 },
     },
   },
+  b: {
+    token: 'b',
+    name: 'Low Beep',
+    waveTypes: [0, 1, 2], // Square, Sawtooth, and Sine waves
+    params: {
+      wave_type: 0, // This will be overridden by waveTypes selection
+
+      // Envelope - short to medium attack, quick decay for beep-like quality
+      p_env_attack: { min: 0.0, max: 0.03 },
+      p_env_sustain: { min: 0.15, max: 0.3 },
+      p_env_decay: { min: 0.1, max: 0.2 },
+      p_env_punch: { min: 0.1, max: 0.2 },
+
+      // Frequency - low range for beep
+      p_base_freq: { min: 0.15, max: 0.35 },
+      p_freq_limit: { min: 0.0, max: 0.0 },
+      p_freq_ramp: { min: -0.02, max: 0.04 }, // Light sweep, can go either way
+      p_freq_dramp: { min: -0.02, max: 0.02 },
+
+      // Light vibrato for character
+      p_vib_strength: { min: 0.0, max: 0.03 }, // Light vibrato
+      p_vib_speed: { min: 0.0, max: 0.06 },
+
+      // Light arpeggio for interest
+      p_arp_mod: { min: -0.1, max: 0.1 }, // Light arpeggio, can go either direction
+      p_arp_speed: { min: 0.4, max: 0.6 }, // Near middle
+
+      // Duty cycle variation
+      p_duty: { min: 0.4, max: 0.6 },
+      p_duty_ramp: { min: -0.02, max: 0.02 }, // Some movement
+
+      // No repeat
+      p_repeat_speed: { min: 0.0, max: 0.0 },
+
+      // Light phaser for texture
+      p_pha_offset: { min: 0.0, max: 0.003 },
+      p_pha_ramp: { min: -0.001, max: 0.001 },
+
+      // Filter for bass frequencies
+      p_lpf_freq: { min: 0.7, max: 0.9 }, // More aggressive filter for low beep
+      p_lpf_ramp: { min: 0.0, max: 0.0 },
+      p_lpf_resonance: { min: 0.0, max: 0.15 }, // A bit more resonance for low frequencies
+
+      // Minimal high-pass to keep it clean
+      p_hpf_freq: { min: 0.0, max: 0.01 },
+      p_hpf_ramp: { min: 0.0, max: 0.0 },
+
+      // Volume with slight variation
+      sound_vol: { min: 0.45, max: 0.55 },
+    },
+  },
+  w: {
+    token: 'w',
+    name: 'Warble',
+    waveTypes: [0, 1, 2], // Square, Sawtooth, and Sine waves
+    params: {
+      wave_type: 0, // This will be overridden by waveTypes selection
+
+      // Envelope - medium attack and sustain to hear the warble
+      p_env_attack: { min: 0.0, max: 0.05 },
+      p_env_sustain: { min: 0.2, max: 0.4 },
+      p_env_decay: { min: 0.1, max: 0.2 },
+      p_env_punch: { min: 0.05, max: 0.15 },
+
+      // Frequency - low-mid range for warbling
+      p_base_freq: { min: 0.2, max: 0.5 },
+      p_freq_limit: { min: 0.0, max: 0.0 },
+      p_freq_ramp: { min: -0.01, max: 0.01 }, // Very slight variation
+      p_freq_dramp: { min: -0.01, max: 0.01 },
+
+      // Strong vibrato for warbling effect
+      p_vib_strength: { min: 0.15, max: 0.3 }, // Strong vibrato creates warble
+      p_vib_speed: { min: 0.15, max: 0.35 }, // Medium speed for warbling (slower than original buzz)
+
+      // No arpeggio
+      p_arp_mod: { min: 0.0, max: 0.0 },
+      p_arp_speed: { min: 0.0, max: 0.0 },
+
+      // Duty cycle variation for texture
+      p_duty: { min: 0.3, max: 0.5 },
+      p_duty_ramp: { min: -0.03, max: 0.03 }, // Some movement for texture
+
+      // No repeat
+      p_repeat_speed: { min: 0.0, max: 0.0 },
+
+      // Moderate phaser for depth
+      p_pha_offset: { min: 0.002, max: 0.006 },
+      p_pha_ramp: { min: -0.002, max: 0.002 },
+
+      // Filter to shape the warble
+      p_lpf_freq: { min: 0.7, max: 0.95 },
+      p_lpf_ramp: { min: 0.0, max: 0.0 },
+      p_lpf_resonance: { min: 0.05, max: 0.15 }, // Some resonance for character
+
+      // Minimal high-pass
+      p_hpf_freq: { min: 0.0, max: 0.02 },
+      p_hpf_ramp: { min: 0.0, max: 0.0 },
+
+      // Volume with slight variation
+      sound_vol: { min: 0.45, max: 0.55 },
+    },
+  },
+  z: {
+    token: 'z',
+    name: 'Buzz',
+    waveTypes: [0, 1, 3], // Square, Sawtooth, and Noise waves
+    params: {
+      wave_type: 0, // This will be overridden by waveTypes selection
+
+      // Envelope - short bursts for buzzing
+      p_env_attack: { min: 0.0, max: 0.02 },
+      p_env_sustain: { min: 0.15, max: 0.35 },
+      p_env_decay: { min: 0.05, max: 0.1 },
+      p_env_punch: { min: 0.1, max: 0.2 },
+
+      // Frequency - low range for buzzy sound
+      p_base_freq: { min: 0.1, max: 0.3 },
+      p_freq_limit: { min: 0.0, max: 0.0 },
+      p_freq_ramp: { min: -0.02, max: 0.02 }, // Slight variation
+      p_freq_dramp: { min: -0.01, max: 0.01 },
+
+      // No vibrato (using repeat instead)
+      p_vib_strength: { min: 0.0, max: 0.02 },
+      p_vib_speed: { min: 0.0, max: 0.05 },
+
+      // No arpeggio
+      p_arp_mod: { min: 0.0, max: 0.0 },
+      p_arp_speed: { min: 0.0, max: 0.0 },
+
+      // Duty cycle for harshness
+      p_duty: { min: 0.15, max: 0.35 }, // Thin duty for harsh buzz
+      p_duty_ramp: { min: -0.1, max: 0.1 }, // Rapid changes
+
+      // Strong repeat for buzzing/stuttering effect
+      p_repeat_speed: { min: 0.4, max: 0.7 }, // Fast repeat creates buzz
+
+      // Light phaser
+      p_pha_offset: { min: 0.0, max: 0.003 },
+      p_pha_ramp: { min: -0.001, max: 0.001 },
+
+      // Heavy filtering for buzz shaping
+      p_lpf_freq: { min: 0.4, max: 0.7 }, // Heavy low-pass for buzz
+      p_lpf_ramp: { min: 0.0, max: 0.0 },
+      p_lpf_resonance: { min: 0.15, max: 0.3 }, // Strong resonance
+
+      // Some high-pass to clean up mud
+      p_hpf_freq: { min: 0.02, max: 0.05 },
+      p_hpf_ramp: { min: 0.0, max: 0.0 },
+
+      // Volume with slight variation
+      sound_vol: { min: 0.45, max: 0.55 },
+    },
+  },
   // Future tokens will be added here:
-  // b: short blip
   // c: low chirp
   // C: high chirp
   // w: slow warble

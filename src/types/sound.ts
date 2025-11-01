@@ -1,7 +1,16 @@
 import type { SynthParameters } from 'sfxr.js'
 
 // Sound token types
-export type SoundToken = 'S' | 's' | 'A' | 'a' | 'B' // S = Upward sweep, s = downward sweep, A = arpeggio up, a = arpeggio down, B = high beep (more tokens to be added)
+export type SoundToken =
+  | 'S' // upward sweep
+  | 's' // downward sweep
+  | 'A' // upward arpeggio
+  | 'a' // downward arpeggio
+  | 'B' // high beep
+  | 'b' // low beep
+  | 'w' // warble
+  | 'z' // buzz
+  | '_' // wait
 
 // Parameter range for randomization
 export interface ParameterRange {
@@ -21,17 +30,20 @@ export interface TokenRangeDefinition {
   }
 }
 
+export interface WaitToken {
+  kind: 'WaitToken'
+  durationMs: number
+}
+
 // Baked token - a specific instance of a token with fixed parameters
 export interface BakedToken {
+  kind: 'BakedToken'
   token: SoundToken
   params: Partial<SynthParameters>
   // Optional ID for caching/reference
   id?: string
 }
 
-// Legacy interface for backward compatibility (will be removed)
-export interface TokenDefinition {
-  token: SoundToken
-  name: string
-  params: Partial<SynthParameters>
-}
+export type PlaybackToken = WaitToken | BakedToken
+
+export type RobotWord = { soundToken: SoundToken; identifier: string }
