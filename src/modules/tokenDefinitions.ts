@@ -105,9 +105,158 @@ export const TOKEN_DEFINITIONS: Record<SoundToken, TokenDefinition> = {
       sound_vol: 0.5,
     },
   },
+  A: {
+    token: 'A',
+    name: 'Arpeggio Up',
+    params: {
+      wave_type: 0, // Square wave
+
+      // Envelope - medium length
+      p_env_attack: 0.07,
+      p_env_sustain: 0.4,
+      p_env_decay: 0.15,
+      p_env_punch: 0.05,
+
+      // Frequency - mid range with subtle sweep
+      p_base_freq: 0.4,
+      p_freq_limit: 0.0,
+      p_freq_ramp: 0.06, // Subtle upward sweep
+      p_freq_dramp: 0.0,
+
+      // Tiny vibrato
+      p_vib_strength: 0.01,
+      p_vib_speed: 0.02,
+
+      // Arpeggio settings
+      p_arp_mod: 0.4, // Upward arpeggio
+      p_arp_speed: 0.5, // Step happens at midpoint
+
+      // Square wave duty
+      p_duty: 0.5,
+      p_duty_ramp: 0.0,
+
+      // No repeat
+      p_repeat_speed: 0.0,
+
+      // Minimal phaser
+      p_pha_offset: 0.001,
+      p_pha_ramp: 0.0,
+
+      // Slight low-pass filter for warmth
+      p_lpf_freq: 0.97,
+      p_lpf_ramp: 0.0,
+      p_lpf_resonance: 0.02,
+
+      // Minimal high-pass filter
+      p_hpf_freq: 0.005,
+      p_hpf_ramp: 0.0,
+
+      // Volume
+      sound_vol: 0.5,
+    },
+  },
+  a: {
+    token: 'a',
+    name: 'Arpeggio Down',
+    params: {
+      wave_type: 1, // Sawtooth wave
+
+      // Envelope - medium length
+      p_env_attack: 0.07,
+      p_env_sustain: 0.4,
+      p_env_decay: 0.15,
+      p_env_punch: 0.05,
+
+      // Frequency - mid-high range with subtle downward sweep
+      p_base_freq: 0.5,
+      p_freq_limit: 0.0,
+      p_freq_ramp: -0.06, // Subtle downward sweep
+      p_freq_dramp: 0.0,
+
+      // Tiny vibrato
+      p_vib_strength: 0.01,
+      p_vib_speed: 0.02,
+
+      // Arpeggio settings
+      p_arp_mod: -0.4, // Downward arpeggio
+      p_arp_speed: 0.5, // Step happens at midpoint
+
+      // Square wave duty
+      p_duty: 0.5,
+      p_duty_ramp: 0.0,
+
+      // No repeat
+      p_repeat_speed: 0.0,
+
+      // Minimal phaser
+      p_pha_offset: 0.001,
+      p_pha_ramp: 0.0,
+
+      // Slight low-pass filter for warmth
+      p_lpf_freq: 0.97,
+      p_lpf_ramp: 0.0,
+      p_lpf_resonance: 0.02,
+
+      // Minimal high-pass filter
+      p_hpf_freq: 0.005,
+      p_hpf_ramp: 0.0,
+
+      // Volume
+      sound_vol: 0.5,
+    },
+  },
+  B: {
+    token: 'B',
+    name: 'High Beep',
+    params: {
+      wave_type: 0, // Square wave
+
+      // Envelope - short attack for beep
+      p_env_attack: 0.01,
+      p_env_sustain: 0.22,
+      p_env_decay: 0.15,
+      p_env_punch: 0.15,
+
+      // Frequency - high range beep
+      p_base_freq: 0.72,
+      p_freq_limit: 0.0,
+      p_freq_ramp: 0.01, // Very light upward sweep
+      p_freq_dramp: 0.0,
+
+      // Light vibrato
+      p_vib_strength: 0.015,
+      p_vib_speed: 0.03,
+
+      // Light arpeggio
+      p_arp_mod: 0.05, // Very subtle upward arp
+      p_arp_speed: 0.5,
+
+      // Square wave duty
+      p_duty: 0.5,
+      p_duty_ramp: 0.01,
+
+      // No repeat
+      p_repeat_speed: 0.0,
+
+      // Light phaser
+      p_pha_offset: 0.0015,
+      p_pha_ramp: 0.0,
+
+      // Slight filter
+      p_lpf_freq: 0.95,
+      p_lpf_ramp: 0.0,
+      p_lpf_resonance: 0.05,
+
+      // Minimal high-pass
+      p_hpf_freq: 0.01,
+      p_hpf_ramp: 0.0,
+
+      // Volume
+      sound_vol: 0.5,
+    },
+  },
   // Future tokens will be added here:
   // b: short blip
-  // B: long blip
   // c: low chirp
   // C: high chirp
   // w: slow warble

@@ -23,6 +23,36 @@ const playDownwardSweep = async () => {
     console.error('Error playing sound:', error)
   }
 }
+
+// Play arpeggio up sound
+const playArpeggioUp = async () => {
+  try {
+    await soundStore.playToken('A')
+    console.log('Played arpeggio up')
+  } catch (error) {
+    console.error('Error playing sound:', error)
+  }
+}
+
+// Play arpeggio down sound
+const playArpeggioDown = async () => {
+  try {
+    await soundStore.playToken('a')
+    console.log('Played arpeggio down')
+  } catch (error) {
+    console.error('Error playing sound:', error)
+  }
+}
+
+// Play high beep sound
+const playHighBeep = async () => {
+  try {
+    await soundStore.playToken('B')
+    console.log('Played high beep')
+  } catch (error) {
+    console.error('Error playing sound:', error)
+  }
+}
 </script>
 
 <template>
@@ -31,36 +61,20 @@ const playDownwardSweep = async () => {
     <p>Click the buttons to generate robot sounds</p>
 
     <div class="button-container">
-      <button @click="playUpwardSweep">Play Upward Sweep (S)</button>
-      <button @click="playDownwardSweep">Play Downward Sweep (s)</button>
+      <button @click="playUpwardSweep">S</button>
+      <button @click="playDownwardSweep">s</button>
+      <button @click="playArpeggioUp">A</button>
+      <button @click="playArpeggioDown">a</button>
+      <button @click="playHighBeep">B</button>
     </div>
   </div>
 </template>
 
 <style scoped>
-.app {
-  padding: 2rem;
-  text-align: center;
-}
-
-h1 {
-  margin-bottom: 1rem;
-}
-
-p {
-  margin-bottom: 2rem;
-}
-
 .button-container {
   display: flex;
   gap: 1rem;
   justify-content: center;
   flex-wrap: wrap;
-}
-
-button {
-  padding: 1rem 2rem;
-  font-size: 1.2rem;
-  cursor: pointer;
 }
 </style>

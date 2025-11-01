@@ -108,9 +108,161 @@ export const TOKEN_RANGES: Record<SoundToken, TokenRangeDefinition> = {
       sound_vol: { min: 0.45, max: 0.55 },
     },
   },
+  A: {
+    token: 'A',
+    name: 'Arpeggio Up',
+    waveTypes: [0, 1, 2], // Square, Sawtooth, and Sine waves
+    params: {
+      wave_type: 0, // This will be overridden by waveTypes selection
+
+      // Envelope - medium length for arpeggio to be audible
+      p_env_attack: { min: 0.05, max: 0.1 },
+      p_env_sustain: { min: 0.3, max: 0.5 },
+      p_env_decay: { min: 0.1, max: 0.2 },
+      p_env_punch: { min: 0.0, max: 0.1 },
+
+      // Frequency - mid to high range with subtle sweep
+      p_base_freq: { min: 0.25, max: 0.6 },
+      p_freq_limit: { min: 0.0, max: 0.0 },
+      p_freq_ramp: { min: 0.03, max: 0.1 }, // Half as drastic as main sweep
+      p_freq_dramp: { min: -0.05, max: 0.05 },
+
+      // Tiny vibrato for organic feel
+      p_vib_strength: { min: 0.0, max: 0.02 },
+      p_vib_speed: { min: 0.0, max: 0.04 },
+
+      // Arpeggio settings - upward 2-note arpeggio
+      p_arp_mod: { min: 0.2, max: 0.6 }, // Positive for upward arpeggio
+      p_arp_speed: { min: 0.3, max: 0.7 }, // When the step happens
+
+      // Duty cycle variation
+      p_duty: { min: 0.45, max: 0.55 },
+      p_duty_ramp: { min: -0.01, max: 0.01 },
+
+      // No repeat
+      p_repeat_speed: { min: 0.0, max: 0.0 },
+
+      // Tiny phaser for depth
+      p_pha_offset: { min: 0.0, max: 0.002 },
+      p_pha_ramp: { min: 0.0, max: 0.0 },
+
+      // Slight filter variation for warmth
+      p_lpf_freq: { min: 0.95, max: 1.0 },
+      p_lpf_ramp: { min: 0.0, max: 0.0 },
+      p_lpf_resonance: { min: 0.0, max: 0.05 },
+
+      // Minimal high-pass for clarity
+      p_hpf_freq: { min: 0.0, max: 0.01 },
+      p_hpf_ramp: { min: 0.0, max: 0.0 },
+
+      // Volume with slight variation
+      sound_vol: { min: 0.45, max: 0.55 },
+    },
+  },
+  a: {
+    token: 'a',
+    name: 'Arpeggio Down',
+    waveTypes: [0, 1, 2], // Square, Sawtooth, and Sine waves
+    params: {
+      wave_type: 0, // This will be overridden by waveTypes selection
+
+      // Envelope - medium length for arpeggio to be audible
+      p_env_attack: { min: 0.05, max: 0.1 },
+      p_env_sustain: { min: 0.3, max: 0.5 },
+      p_env_decay: { min: 0.1, max: 0.2 },
+      p_env_punch: { min: 0.0, max: 0.1 },
+
+      // Frequency - mid to high range with subtle downward sweep
+      p_base_freq: { min: 0.3, max: 0.7 },
+      p_freq_limit: { min: 0.0, max: 0.0 },
+      p_freq_ramp: { min: -0.1, max: -0.03 }, // Subtle downward sweep (half as drastic)
+      p_freq_dramp: { min: -0.05, max: 0.05 },
+
+      // Tiny vibrato for organic feel
+      p_vib_strength: { min: 0.0, max: 0.02 },
+      p_vib_speed: { min: 0.0, max: 0.04 },
+
+      // Arpeggio settings - downward 2-note arpeggio
+      p_arp_mod: { min: -0.6, max: -0.2 }, // Negative for downward arpeggio
+      p_arp_speed: { min: 0.3, max: 0.7 }, // When the step happens
+
+      // Duty cycle variation
+      p_duty: { min: 0.45, max: 0.55 },
+      p_duty_ramp: { min: -0.01, max: 0.01 },
+
+      // No repeat
+      p_repeat_speed: { min: 0.0, max: 0.0 },
+
+      // Tiny phaser for depth
+      p_pha_offset: { min: 0.0, max: 0.002 },
+      p_pha_ramp: { min: 0.0, max: 0.0 },
+
+      // Slight filter variation for warmth
+      p_lpf_freq: { min: 0.95, max: 1.0 },
+      p_lpf_ramp: { min: 0.0, max: 0.0 },
+      p_lpf_resonance: { min: 0.0, max: 0.05 },
+
+      // Minimal high-pass for clarity
+      p_hpf_freq: { min: 0.0, max: 0.01 },
+      p_hpf_ramp: { min: 0.0, max: 0.0 },
+
+      // Volume with slight variation
+      sound_vol: { min: 0.45, max: 0.55 },
+    },
+  },
+  B: {
+    token: 'B',
+    name: 'High Beep',
+    waveTypes: [0, 1, 2], // Square, Sawtooth, and Sine waves
+    params: {
+      wave_type: 0, // This will be overridden by waveTypes selection
+
+      // Envelope - short to medium attack, quick decay for beep-like quality
+      p_env_attack: { min: 0.0, max: 0.03 },
+      p_env_sustain: { min: 0.15, max: 0.3 },
+      p_env_decay: { min: 0.1, max: 0.2 },
+      p_env_punch: { min: 0.1, max: 0.2 },
+
+      // Frequency - high range for beep
+      p_base_freq: { min: 0.6, max: 0.85 },
+      p_freq_limit: { min: 0.0, max: 0.0 },
+      p_freq_ramp: { min: -0.02, max: 0.04 }, // Light sweep, can go either way
+      p_freq_dramp: { min: -0.02, max: 0.02 },
+
+      // Light vibrato for character
+      p_vib_strength: { min: 0.0, max: 0.03 }, // Light vibrato
+      p_vib_speed: { min: 0.0, max: 0.06 },
+
+      // Light arpeggio for interest
+      p_arp_mod: { min: -0.1, max: 0.1 }, // Light arpeggio, can go either direction
+      p_arp_speed: { min: 0.4, max: 0.6 }, // Near middle
+
+      // Duty cycle variation
+      p_duty: { min: 0.4, max: 0.6 },
+      p_duty_ramp: { min: -0.02, max: 0.02 }, // Some movement
+
+      // No repeat
+      p_repeat_speed: { min: 0.0, max: 0.0 },
+
+      // Light phaser for texture
+      p_pha_offset: { min: 0.0, max: 0.003 },
+      p_pha_ramp: { min: -0.001, max: 0.001 },
+
+      // Filter for clarity in high frequencies
+      p_lpf_freq: { min: 0.9, max: 1.0 },
+      p_lpf_ramp: { min: 0.0, max: 0.0 },
+      p_lpf_resonance: { min: 0.0, max: 0.1 },
+
+      // Minimal high-pass to keep it clean
+      p_hpf_freq: { min: 0.0, max: 0.02 },
+      p_hpf_ramp: { min: 0.0, max: 0.0 },
+
+      // Volume with slight variation
+      sound_vol: { min: 0.45, max: 0.55 },
+    },
+  },
   // Future tokens will be added here:
   // b: short blip
-  // B: long blip
   // c: low chirp
   // C: high chirp
   // w: slow warble
