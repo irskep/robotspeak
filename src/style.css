@@ -75,13 +75,19 @@
 
   /* Effects */
   --shadow-glow-primary: 0 0 20px rgba(255, 153, 0, 0.5);
+  --shadow-glow-primary-sm: 0 0 10px rgba(255, 153, 0, 0.3);
+  --shadow-glow-primary-lg: 0 0 25px rgba(255, 153, 0, 0.6);
   --shadow-glow-accent: 0 0 10px rgba(255, 176, 0, 0.3);
+  --shadow-glow-white-subtle: 0 0 5px rgba(255, 255, 255, 0.1);
   --transition-base: all 0.2s;
 
   /* Alpha Variants */
   --color-primary-alpha-10: rgba(255, 153, 0, 0.1);
   --color-primary-alpha-20: rgba(255, 153, 0, 0.2);
+  --color-primary-alpha-30: rgba(255, 153, 0, 0.3);
+  --color-primary-alpha-60: rgba(255, 153, 0, 0.6);
   --color-accent-alpha-05: rgba(255, 176, 0, 0.05);
+  --color-white-alpha-05: rgba(255, 255, 255, 0.05);
   --color-white-alpha-10: rgba(255, 255, 255, 0.1);
 
   /* Layout */
@@ -156,6 +162,12 @@ button {
 button:hover {
   box-shadow: var(--shadow-glow-primary);
   background: var(--color-primary-alpha-10);
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(1px);
+  box-shadow: var(--shadow-glow-primary-sm);
 }
 
 button.primary {
@@ -165,6 +177,16 @@ button.primary {
   background: linear-gradient(90deg, var(--color-primary-alpha-20), transparent);
 }
 
+button.primary:hover {
+  background: linear-gradient(90deg, var(--color-primary-alpha-30), transparent);
+  box-shadow: var(--shadow-glow-primary);
+}
+
+button.primary:active {
+  background: linear-gradient(90deg, var(--color-primary-alpha-10), transparent);
+  border-left-color: var(--color-accent);
+}
+
 button.debug {
   background: transparent;
   border: var(--border-width-thin) solid var(--color-white-200);
@@ -172,12 +194,22 @@ button.debug {
   font-size: var(--font-size-xs);
   padding: var(--button-padding-debug);
   text-transform: none;  /* Preserve case for sound tokens */
+  transition: var(--transition-base);
 }
 
 button.debug:hover {
-  box-shadow: none;
+  box-shadow: var(--shadow-glow-white-subtle);
   border-color: var(--color-white-400);
   color: var(--color-white-800);
+  transform: translateY(-1px);
+  background: var(--color-white-alpha-10);
+}
+
+button.debug:active {
+  transform: translateY(0);
+  box-shadow: none;
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 /* === Panels === */

@@ -37,24 +37,31 @@ const updateEyePosition = () => {
   animationFrameId = requestAnimationFrame(updateEyePosition)
 }
 
+// Eye movement configuration
+const PUPIL_MOVEMENT_RANGE = 12 // Maximum offset in pixels (-6 to 6)
+
 // Calculate pupil offsets using simple linear interpolation
 const leftPupilTransform = computed(() => {
-  // Map mouse position to pupil movement range (-6 to 6 pixels for subtler movement)
-  const xOffset = (mouseX.value - 0.5) * 12 // -6 to 6
-  const yOffset = (mouseY.value - 0.5) * 12 // -6 to 6
+  // Map mouse position to pupil movement range
+  const xOffset = (mouseX.value - 0.5) * PUPIL_MOVEMENT_RANGE
+  const yOffset = (mouseY.value - 0.5) * PUPIL_MOVEMENT_RANGE
   return `translate(${xOffset}, ${yOffset})`
 })
 
 const rightPupilTransform = computed(() => {
   // Same mapping for right eye
-  const xOffset = (mouseX.value - 0.5) * 12
-  const yOffset = (mouseY.value - 0.5) * 12
+  const xOffset = (mouseX.value - 0.5) * PUPIL_MOVEMENT_RANGE
+  const yOffset = (mouseY.value - 0.5) * PUPIL_MOVEMENT_RANGE
   return `translate(${xOffset}, ${yOffset})`
 })
 
+// Canvas configuration
+const CANVAS_WIDTH = 300
+const CANVAS_HEIGHT = 113 // Reduced from 150 to make canvas shorter
+
 onMounted(() => {
-  canvas.value!.width = 300
-  canvas.value!.height = 113 // Reduced from 150 to make canvas shorter
+  canvas.value!.width = CANVAS_WIDTH
+  canvas.value!.height = CANVAS_HEIGHT
   soundStore.initialize(canvas.value!)
 
   // Set initial volume after initialization
@@ -253,10 +260,11 @@ const playToken = async (s: SoundToken) => {
 }
 
 .Robot__Mouth {
+  --mouth-bottom-offset: 10%;
   position: absolute;
   top: 0;
   right: 0;
-  bottom: 10%;
+  bottom: var(--mouth-bottom-offset);
   left: 0;
   display: flex;
   flex-direction: column;
@@ -265,8 +273,9 @@ const playToken = async (s: SoundToken) => {
 }
 
 canvas {
+  --canvas-width: 70%;
   position: absolute;
-  width: 70%;
+  width: var(--canvas-width);
   height: auto;
   image-rendering: pixelated;
   aspect-ratio: var(--aspect-ratio-canvas);
@@ -277,7 +286,8 @@ canvas {
 
 /* Robot eyes - no animation, just bright */
 .robot-eyes circle {
-  filter: brightness(1.2); /* Always bright */
+  --eye-brightness: 1.2;
+  filter: brightness(var(--eye-brightness)); /* Always bright */
 }
 
 /* Eye tracking - no transition needed with requestAnimationFrame */
@@ -287,17 +297,19 @@ canvas {
 
 /* Antenna always glowing */
 .robot-antenna circle {
-  filter: drop-shadow(0 0 8px var(--color-primary));
+  --antenna-glow-size: 8px;
+  filter: drop-shadow(0 0 var(--antenna-glow-size) var(--color-primary));
 }
 
 /* Volume Control */
 .volume-control {
+  --control-max-width: 400px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-lg);
   margin: var(--space-xl) auto;
-  max-width: 400px;
+  max-width: var(--control-max-width);
 }
 
 .volume-slider {
@@ -309,26 +321,63 @@ canvas {
   outline: none;
   position: relative;
   border: var(--border-width-thin) solid var(--color-secondary);
+  transition: var(--transition-base);
+}
+
+.volume-slider:hover {
+  border-color: var(--color-accent);
 }
 
 .volume-slider::-webkit-slider-thumb {
+  --thumb-size: 20px;
+  --thumb-size-hover: 24px;
+  --thumb-size-active: 18px;
   -webkit-appearance: none;
   appearance: none;
-  width: 20px;
-  height: 20px;
+  width: var(--thumb-size);
+  height: var(--thumb-size);
   background: var(--color-primary);
   cursor: pointer;
   border: var(--border-width-base) solid var(--color-accent);
   box-shadow: var(--shadow-glow-primary);
+  transition: var(--transition-base);
+}
+
+.volume-slider::-webkit-slider-thumb:hover {
+  width: var(--thumb-size-hover);
+  height: var(--thumb-size-hover);
+  box-shadow: var(--shadow-glow-primary-lg);
+}
+
+.volume-slider::-webkit-slider-thumb:active {
+  width: var(--thumb-size-active);
+  height: var(--thumb-size-active);
+  background: var(--color-accent);
 }
 
 .volume-slider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
+  --thumb-size: 20px;
+  --thumb-size-hover: 24px;
+  --thumb-size-active: 18px;
+  width: var(--thumb-size);
+  height: var(--thumb-size);
   background: var(--color-primary);
   cursor: pointer;
   border: var(--border-width-base) solid var(--color-accent);
   box-shadow: var(--shadow-glow-primary);
+  transition: var(--transition-base);
+}
+
+.volume-slider::-moz-range-thumb:hover {
+  width: var(--thumb-size-hover);
+  height: var(--thumb-size-hover);
+  box-shadow: var(--shadow-glow-primary-lg);
+}
+
+.volume-slider::-moz-range-thumb:active {
+  width: var(--thumb-size-active);
+  height: var(--thumb-size-active);
+  background: var(--color-accent);
 }
 
 .volume-slider::-webkit-slider-runnable-track {
@@ -341,7 +390,8 @@ canvas {
 }
 
 .volume-label {
-  min-width: 3em;
+  --label-min-width: 3em;
+  min-width: var(--label-min-width);
   text-align: left;
   color: var(--color-accent);
   font-size: var(--font-size-sm);
