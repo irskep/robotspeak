@@ -14,6 +14,7 @@ export const useSoundStore = defineStore('sound', () => {
   const isInitialized = ref(false)
   const waviz = ref<Waviz | null>(null)
   const mediaStreamDest = ref<MediaStreamAudioDestinationNode | null>(null)
+  const masterGain = ref<GainNode | null>(null)
 
   // Getters
   const isReady = computed(() => isInitialized.value)
@@ -34,7 +35,11 @@ export const useSoundStore = defineStore('sound', () => {
         throw new Error('Web Audio API not supported')
       }
       audioContext.value = new AudioContextConstructor()
+      masterGain.value = audioContext.value.createGain()
+      masterGain.value.gain.value = 0.15 // Default volume 15%
       mediaStreamDest.value = audioContext.value.createMediaStreamDestination()
+      masterGain.value.connect(audioContext.value.destination)
+      // Don't connect masterGain to mediaStreamDest - we want pre-volume signal for viz
       waviz.value = new Waviz(canvas, mediaStreamDest.value.stream)
       isInitialized.value = true
       console.log('Sound engine initialized')
@@ -91,10 +96,13 @@ export const useSoundStore = defineStore('sound', () => {
       // Use sfxr's toWebAudio helper to create an AudioBufferSourceNode
       const source = sfxr.toWebAudio(sfxrParams, audioContext.value)
 
-      if (source) {
-        // Connect the source to the audio context's destination
-        source.connect(audioContext.value.destination)
-        if (mediaStreamDest.value) source.connect(mediaStreamDest.value)
+      if (source && masterGain.value) {
+        // Connect the source through the master gain for audio output
+        source.connect(masterGain.value)
+        // Also connect directly to mediaStreamDest for pre-volume visualization
+        if (mediaStreamDest.value) {
+          source.connect(mediaStreamDest.value)
+        }
         // Start playing the sound
         source.start(0)
 
@@ -124,6 +132,16 @@ export const useSoundStore = defineStore('sound', () => {
     }
   }
 
+  /**
+   * Set the master volume (0-100)
+   */
+  const setVolume = (volume: number): void => {
+    if (masterGain.value) {
+      // Convert 0-100 to 0-1
+      masterGain.value.gain.value = Math.max(0, Math.min(100, volume)) / 100
+    }
+  }
+
   return {
     // State (exposed as refs)
     audioContext,
@@ -140,5 +158,6 @@ export const useSoundStore = defineStore('sound', () => {
     playSequence,
     playSoundWithParams,
     getPlaybackToken,
+    setVolume,
   }
 })

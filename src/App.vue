@@ -2,12 +2,18 @@
 import { useSoundStore } from '@/stores/soundStore'
 import { makeBeepBoopsUsingFancyGrammarAlgorithm } from './grammars/subphrasesGrammar'
 import type { SoundToken } from './types/sound'
-import { onMounted, onUnmounted, ref, computed } from 'vue'
+import { onMounted, onUnmounted, ref, computed, watch } from 'vue'
 
 // Get sound store instance
 const soundStore = useSoundStore()
 const canvas = ref<HTMLCanvasElement>()
 const lastSequenceAsString = ref('')
+const volume = ref(15) // Default volume at 15%
+
+// Update volume in sound store when slider changes
+watch(volume, (newVolume) => {
+  soundStore.setVolume(newVolume)
+})
 
 // Mouse tracking for eye movement
 const rawMouseX = ref(0)
@@ -50,6 +56,9 @@ onMounted(() => {
   canvas.value!.width = 300
   canvas.value!.height = 113 // Reduced from 150 to make canvas shorter
   soundStore.initialize(canvas.value!)
+
+  // Set initial volume after initialization
+  soundStore.setVolume(volume.value)
 
   // Add mouse listener and start animation loop
   window.addEventListener('mousemove', handleMouseMove)
@@ -194,6 +203,20 @@ const playToken = async (s: SoundToken) => {
       </div>
     </section>
 
+    <section class="volume-control">
+      <input
+        type="range"
+        v-model="volume"
+        min="0"
+        max="100"
+        step="1"
+        class="volume-slider"
+        :style="`--volume-percentage: ${volume}%`"
+        aria-label="Volume control"
+      />
+      <span class="volume-label">{{ volume }}%</span>
+    </section>
+
     <section class="control-panel">
       <button class="primary" @click="playBeepBoops">Make with the beep boops</button>
     </section>
@@ -252,14 +275,9 @@ canvas {
   box-shadow: var(--shadow-glow-accent);
 }
 
-/* Subtle animation for robot eyes */
+/* Robot eyes - no animation, just bright */
 .robot-eyes circle {
-  animation: eyePulse 3s ease-in-out infinite;
   filter: brightness(1.2); /* Always bright */
-}
-
-.robot-eyes circle:nth-child(3) {
-  animation-delay: 0.3s;
 }
 
 /* Eye tracking - no transition needed with requestAnimationFrame */
@@ -272,13 +290,62 @@ canvas {
   filter: drop-shadow(0 0 8px var(--color-primary));
 }
 
-@keyframes eyePulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.85;
-  }
+/* Volume Control */
+.volume-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg);
+  margin: var(--space-xl) auto;
+  max-width: 400px;
+}
+
+.volume-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: var(--border-width-thick);
+  background: var(--color-surface);
+  outline: none;
+  position: relative;
+  border: var(--border-width-thin) solid var(--color-secondary);
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--color-primary);
+  cursor: pointer;
+  border: var(--border-width-base) solid var(--color-accent);
+  box-shadow: var(--shadow-glow-primary);
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--color-primary);
+  cursor: pointer;
+  border: var(--border-width-base) solid var(--color-accent);
+  box-shadow: var(--shadow-glow-primary);
+}
+
+.volume-slider::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    to right,
+    var(--color-primary) 0%,
+    var(--color-primary) var(--volume-percentage),
+    transparent var(--volume-percentage)
+  );
+}
+
+.volume-label {
+  min-width: 3em;
+  text-align: left;
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
 }
 </style>
