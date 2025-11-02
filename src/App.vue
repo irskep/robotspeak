@@ -6,6 +6,8 @@ import { sequenceToWav } from '@/modules/sequenceToWav'
 import { onMounted, ref, watch } from 'vue'
 import { useEyeTracking } from '@/composables/useEyeTracking'
 import RobotDisplay from '@/components/RobotDisplay.vue'
+import VolumeControl from '@/components/VolumeControl.vue'
+import DiagnosticsPanel from '@/components/DiagnosticsPanel.vue'
 
 // Get sound store instance
 const soundStore = useSoundStore()
@@ -103,19 +105,7 @@ const playToken = async (s: SoundToken) => {
       </RobotDisplay>
     </section>
 
-    <section class="volume-control">
-      <input
-        type="range"
-        v-model="volume"
-        min="0"
-        max="100"
-        step="1"
-        class="volume-slider"
-        :style="`--volume-percentage: ${volume}%`"
-        aria-label="Volume control"
-      />
-      <span class="volume-label">{{ volume }}%</span>
-    </section>
+    <VolumeControl v-model="volume" />
 
     <section class="control-panel">
       <button class="primary" @click="playBeepBoops">Make with the beep boops</button>
@@ -131,20 +121,7 @@ const playToken = async (s: SoundToken) => {
       <pre>{{ lastSequenceAsString || '&nbsp;' }}</pre>
     </section>
 
-    <section class="audio-export" v-if="lastSequenceWavDataUri" style="display: none">
-      <audio :src="lastSequenceWavDataUri" controls></audio>
-    </section>
-
-    <aside class="diagnostics">
-      <button class="debug" @click="playToken('S')">S</button>
-      <button class="debug" @click="playToken('s')">s</button>
-      <button class="debug" @click="playToken('A')">A</button>
-      <button class="debug" @click="playToken('a')">a</button>
-      <button class="debug" @click="playToken('B')">B</button>
-      <button class="debug" @click="playToken('b')">b</button>
-      <button class="debug" @click="playToken('w')">w</button>
-      <button class="debug" @click="playToken('z')">z</button>
-    </aside>
+    <DiagnosticsPanel :wavDataUri="lastSequenceWavDataUri" @play-token="playToken" />
   </main>
 </template>
 
@@ -159,117 +136,5 @@ canvas {
   border: var(--border-width-base) solid var(--color-accent);
   background: var(--color-surface-bright);
   box-shadow: var(--shadow-glow-accent);
-}
-
-/* Volume Control */
-.volume-control {
-  --control-max-width: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-lg);
-  margin: var(--space-xl) auto;
-  max-width: var(--control-max-width);
-}
-
-.volume-slider {
-  flex: 1;
-  -webkit-appearance: none;
-  appearance: none;
-  height: var(--border-width-thick);
-  background: var(--color-surface);
-  outline: none;
-  position: relative;
-  border: var(--border-width-thin) solid var(--color-secondary);
-  transition: var(--transition-base);
-}
-
-.volume-slider:hover {
-  border-color: var(--color-accent);
-}
-
-.volume-slider::-webkit-slider-thumb {
-  --thumb-size: 20px;
-  --thumb-size-hover: 24px;
-  --thumb-size-active: 18px;
-  -webkit-appearance: none;
-  appearance: none;
-  width: var(--thumb-size);
-  height: var(--thumb-size);
-  background: var(--color-primary);
-  cursor: pointer;
-  border: var(--border-width-base) solid var(--color-accent);
-  box-shadow: var(--shadow-glow-primary);
-  transition: var(--transition-base);
-}
-
-.volume-slider::-webkit-slider-thumb:hover {
-  width: var(--thumb-size-hover);
-  height: var(--thumb-size-hover);
-  box-shadow: var(--shadow-glow-primary-lg);
-}
-
-.volume-slider::-webkit-slider-thumb:active {
-  width: var(--thumb-size-active);
-  height: var(--thumb-size-active);
-  background: var(--color-accent);
-}
-
-.volume-slider::-moz-range-thumb {
-  --thumb-size: 20px;
-  --thumb-size-hover: 24px;
-  --thumb-size-active: 18px;
-  width: var(--thumb-size);
-  height: var(--thumb-size);
-  background: var(--color-primary);
-  cursor: pointer;
-  border: var(--border-width-base) solid var(--color-accent);
-  box-shadow: var(--shadow-glow-primary);
-  transition: var(--transition-base);
-}
-
-.volume-slider::-moz-range-thumb:hover {
-  width: var(--thumb-size-hover);
-  height: var(--thumb-size-hover);
-  box-shadow: var(--shadow-glow-primary-lg);
-}
-
-.volume-slider::-moz-range-thumb:active {
-  width: var(--thumb-size-active);
-  height: var(--thumb-size-active);
-  background: var(--color-accent);
-}
-
-.volume-slider::-webkit-slider-runnable-track {
-  background: linear-gradient(
-    to right,
-    var(--color-primary) 0%,
-    var(--color-primary) var(--volume-percentage),
-    transparent var(--volume-percentage)
-  );
-}
-
-.volume-label {
-  --label-min-width: 3em;
-  min-width: var(--label-min-width);
-  text-align: left;
-  color: var(--color-accent);
-  font-size: var(--font-size-sm);
-  letter-spacing: var(--letter-spacing-wide);
-  text-transform: uppercase;
-}
-
-/* Audio Export */
-.audio-export {
-  --audio-max-width: 400px;
-  display: flex;
-  justify-content: center;
-  margin: var(--space-lg) auto;
-  max-width: var(--audio-max-width);
-}
-
-.audio-export audio {
-  width: 100%;
-  filter: hue-rotate(180deg) saturate(2);
 }
 </style>
