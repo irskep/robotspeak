@@ -266,18 +266,10 @@ const playToken = async (s: SoundToken) => {
 
     <section class="control-panel">
       <button class="primary" @click="playBeepBoops">Make with the beep boops</button>
-      <button
-        v-if="lastBakedSequence.length > 0"
-        class="secondary"
-        @click="replaySequence"
-      >
+      <button class="secondary" :disabled="lastBakedSequence.length === 0" @click="replaySequence">
         Replay
       </button>
-      <button
-        v-if="lastSequenceWavDataUri"
-        class="secondary"
-        @click="downloadWav"
-      >
+      <button class="secondary" :disabled="!lastSequenceWavDataUri" @click="downloadWav">
         Download
       </button>
     </section>
