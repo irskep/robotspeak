@@ -187,6 +187,24 @@ button.primary:active {
   border-left-color: var(--color-accent);
 }
 
+button.secondary {
+  border: var(--border-width-base) solid var(--color-secondary);
+  padding: var(--button-padding-primary);
+  font-size: var(--font-size-lg);
+  background: linear-gradient(90deg, rgba(0, 153, 255, 0.1), transparent);
+  color: var(--color-secondary);
+}
+
+button.secondary:hover {
+  background: linear-gradient(90deg, rgba(0, 153, 255, 0.2), transparent);
+  box-shadow: 0 0 15px rgba(0, 153, 255, 0.4);
+}
+
+button.secondary:active {
+  background: linear-gradient(90deg, rgba(0, 153, 255, 0.05), transparent);
+  border-color: var(--color-accent);
+}
+
 button.debug {
   background: transparent;
   border: var(--border-width-thin) solid var(--color-white-200);
@@ -246,7 +264,10 @@ button.debug:active {
 }
 
 .control-panel {
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-lg);
   margin: var(--space-xl) 0;
 }
 

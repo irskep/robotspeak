@@ -47,3 +47,11 @@ export interface BakedToken {
 export type PlaybackToken = WaitToken | BakedToken
 
 export type RobotWord = { soundToken: SoundToken; identifier: string }
+
+// A RobotWord that has been baked into a specific PlaybackToken
+// This ensures consistent sound parameters for the same identifier
+export type BakedRobotWord = {
+  soundToken: SoundToken
+  identifier: string
+  playbackToken: PlaybackToken
+}

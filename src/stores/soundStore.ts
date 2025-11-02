@@ -2,7 +2,7 @@ import Waviz from 'waviz/core'
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { sfxr, Params, type SynthParameters } from 'sfxr.js'
-import type { RobotWord, SoundToken, PlaybackToken } from '@/types/sound'
+import type { RobotWord, SoundToken, PlaybackToken, BakedRobotWord } from '@/types/sound'
 import { bakeToken } from '@/modules/tokenBaker'
 
 /**
@@ -114,22 +114,38 @@ export const useSoundStore = defineStore('sound', () => {
     }
   }
 
-  const playSequence = async (words: RobotWord[]) => {
-    console.log('Playing sequence:', JSON.stringify(words))
+  /**
+   * Bake a sequence of RobotWords into BakedRobotWords
+   * Ensures consistent PlaybackTokens for the same identifier
+   */
+  const bakeSequence = async (words: RobotWord[]): Promise<BakedRobotWord[]> => {
     const playbackTokensByRobotWordId = new Map<string, PlaybackToken>()
-    const playbackTokenSequence = new Array<PlaybackToken>()
+    const bakedSequence: BakedRobotWord[] = []
 
     for (const word of words) {
       const rwid = `${word.soundToken}${word.identifier}`
       if (!playbackTokensByRobotWordId.has(rwid)) {
         playbackTokensByRobotWordId.set(rwid, await bakeToken(word.soundToken))
       }
-      playbackTokenSequence.push(playbackTokensByRobotWordId.get(rwid)!)
+      bakedSequence.push({
+        soundToken: word.soundToken,
+        identifier: word.identifier,
+        playbackToken: playbackTokensByRobotWordId.get(rwid)!,
+      })
     }
 
-    for (const playbackToken of playbackTokenSequence) {
-      await playPlaybackToken(playbackToken)
+    return bakedSequence
+  }
+
+  const playSequence = async (words: RobotWord[]): Promise<BakedRobotWord[]> => {
+    console.log('Playing sequence:', JSON.stringify(words))
+    const bakedSequence = await bakeSequence(words)
+
+    for (const bakedWord of bakedSequence) {
+      await playPlaybackToken(bakedWord.playbackToken)
     }
+
+    return bakedSequence
   }
 
   /**
@@ -156,6 +172,7 @@ export const useSoundStore = defineStore('sound', () => {
     playPlaybackToken,
     playSoundToken,
     playSequence,
+    bakeSequence,
     playSoundWithParams,
     getPlaybackToken,
     setVolume,

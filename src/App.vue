@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { useSoundStore } from '@/stores/soundStore'
 import { makeBeepBoopsUsingFancyGrammarAlgorithm } from './grammars/subphrasesGrammar'
-import type { SoundToken } from './types/sound'
+import type { SoundToken, RobotWord, BakedRobotWord } from './types/sound'
+import { sequenceToWav } from '@/modules/sequenceToWav'
 import { onMounted, onUnmounted, ref, computed, watch } from 'vue'
 
 // Get sound store instance
 const soundStore = useSoundStore()
 const canvas = ref<HTMLCanvasElement>()
 const lastSequenceAsString = ref('')
+const lastSequence = ref<RobotWord[]>([])
+const lastBakedSequence = ref<BakedRobotWord[]>([])
+const lastSequenceWavDataUri = ref<string>('')
 const volume = ref(15) // Default volume at 15%
 
 // Update volume in sound store when slider changes
@@ -83,8 +87,27 @@ const playBeepBoops = async () => {
   soundStore.waviz?.visualizer?.simpleLine()
   soundStore.waviz?.input.initializePending()
   const seq = makeBeepBoopsUsingFancyGrammarAlgorithm()
+  lastSequence.value = seq
   lastSequenceAsString.value = seq.map((w) => `${w.soundToken}${w.identifier}`).join(' ')
-  soundStore.playSequence(seq)
+
+  // Play the sequence and get the baked version
+  const bakedSeq = await soundStore.playSequence(seq)
+  lastBakedSequence.value = bakedSeq
+
+  // Generate WAV file for the baked sequence
+  lastSequenceWavDataUri.value = await sequenceToWav(bakedSeq)
+}
+
+const replaySequence = async () => {
+  if (lastBakedSequence.value.length === 0) return
+
+  soundStore.waviz?.visualizer?.simpleLine()
+  soundStore.waviz?.input.initializePending()
+
+  // Replay the already baked sequence
+  for (const bakedWord of lastBakedSequence.value) {
+    await soundStore.playPlaybackToken(bakedWord.playbackToken)
+  }
 }
 
 const playToken = async (s: SoundToken) => {
@@ -226,10 +249,21 @@ const playToken = async (s: SoundToken) => {
 
     <section class="control-panel">
       <button class="primary" @click="playBeepBoops">Make with the beep boops</button>
+      <button
+        v-if="lastBakedSequence.length > 0"
+        class="secondary"
+        @click="replaySequence"
+      >
+        Replay
+      </button>
     </section>
 
     <section class="readout">
       <pre>{{ lastSequenceAsString || '&nbsp;' }}</pre>
+    </section>
+
+    <section class="audio-export" v-if="lastSequenceWavDataUri">
+      <audio :src="lastSequenceWavDataUri" controls></audio>
     </section>
 
     <aside class="diagnostics">
@@ -397,5 +431,19 @@ canvas {
   font-size: var(--font-size-sm);
   letter-spacing: var(--letter-spacing-wide);
   text-transform: uppercase;
+}
+
+/* Audio Export */
+.audio-export {
+  --audio-max-width: 400px;
+  display: flex;
+  justify-content: center;
+  margin: var(--space-lg) auto;
+  max-width: var(--audio-max-width);
+}
+
+.audio-export audio {
+  width: 100%;
+  filter: hue-rotate(180deg) saturate(2);
 }
 </style>
