@@ -16,7 +16,7 @@ onMounted(() => {
 })
 
 const playBeepBoops = async () => {
-  soundStore.waviz?.visualizer?.simpleBars()
+  soundStore.waviz?.visualizer?.simpleLine()
   soundStore.waviz?.input.initializePending()
   const seq = makeBeepBoopsUsingFancyGrammarAlgorithm()
   lastSequenceAsString.value = seq.map((w) => `${w.soundToken}${w.identifier}`).join(' ')
@@ -34,69 +34,69 @@ const playToken = async (s: SoundToken) => {
 </script>
 
 <template>
-  <div class="app">
-    <div class="Robot">
-      <svg viewBox="-100 0 200 200">
-        <path d="M 0 50 A 80 80 0 0 130 5" stroke="blue" fill="transparent"></path>
-        <circle cx="30" cy="5" r="5" fill="blue"></circle>
-        <rect
-          x="-100"
-          y="50"
-          width="200"
-          height="150"
-          rx="10"
-          ry="10"
-          stroke-width="1"
-          stroke="blue"
-          fill="deepskyblue"
-        ></rect>
-        <circle cx="-50" cy="80" r="20" stroke="orange" fill="yellow"></circle>
-        <circle cx="50" cy="80" r="20" stroke="orange" fill="yellow"></circle>
-      </svg>
-      <div class="Robot__Mouth">
-        <canvas ref="canvas"></canvas>
+  <main class="console">
+    <header class="interface-header">
+      <h1>Talk to TRN5-F0RMR</h1>
+    </header>
+
+    <section class="primary-display">
+      <div class="Robot">
+        <svg viewBox="-100 0 200 200">
+          <path d="M 0 50 A 80 80 0 0 130 5" stroke="blue" fill="transparent"></path>
+          <circle cx="30" cy="5" r="5" fill="blue"></circle>
+          <rect
+            x="-100"
+            y="50"
+            width="200"
+            height="150"
+            rx="10"
+            ry="10"
+            stroke-width="1"
+            stroke="blue"
+            fill="deepskyblue"
+          ></rect>
+          <circle cx="-50" cy="80" r="20" stroke="orange" fill="yellow"></circle>
+          <circle cx="50" cy="80" r="20" stroke="orange" fill="yellow"></circle>
+        </svg>
+        <div class="Robot__Mouth">
+          <canvas ref="canvas"></canvas>
+        </div>
       </div>
-    </div>
+    </section>
 
-    <div class="button-container">
-      <button @click="playBeepBoops">Make with the beep boops</button>
-    </div>
+    <section class="control-panel">
+      <button class="primary" @click="playBeepBoops">Make with the beep boops</button>
+    </section>
 
-    <div>
-      <pre>{{ lastSequenceAsString || '&nbsp;' }}</pre>
-    </div>
+    <section class="readout" v-if="lastSequenceAsString">
+      <pre>{{ lastSequenceAsString }}</pre>
+    </section>
 
-    <div class="button-container">
-      <button @click="playToken('S')">S</button>
-      <button @click="playToken('s')">s</button>
-      <button @click="playToken('A')">A</button>
-      <button @click="playToken('a')">a</button>
-      <button @click="playToken('B')">B</button>
-      <button @click="playToken('b')">b</button>
-      <button @click="playToken('w')">w</button>
-      <button @click="playToken('z')">z</button>
-    </div>
-  </div>
+    <aside class="diagnostics">
+      <button class="debug" @click="playToken('S')">S</button>
+      <button class="debug" @click="playToken('s')">s</button>
+      <button class="debug" @click="playToken('A')">A</button>
+      <button class="debug" @click="playToken('a')">a</button>
+      <button class="debug" @click="playToken('B')">B</button>
+      <button class="debug" @click="playToken('b')">b</button>
+      <button class="debug" @click="playToken('w')">w</button>
+      <button class="debug" @click="playToken('z')">z</button>
+    </aside>
+  </main>
 </template>
 
 <style scoped>
-.app {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  align-items: center;
-}
-
-.button-container {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
 .Robot {
-  width: 50vw;
+  width: var(--width-robot);
+  max-width: var(--max-width-robot);
+  margin: 0 auto;
   position: relative;
+  aspect-ratio: var(--aspect-ratio-robot);
+}
+
+.Robot svg {
+  width: 100%;
+  height: 100%;
 }
 
 .Robot__Mouth {
@@ -114,9 +114,11 @@ const playToken = async (s: SoundToken) => {
 canvas {
   position: absolute;
   width: 70%;
+  height: auto;
   image-rendering: pixelated;
-  aspect-ratio: 300 / 150;
-  border: 1px solid yellow;
-  background-color: darkblue;
+  aspect-ratio: var(--aspect-ratio-canvas);
+  border: var(--border-width-base) solid var(--color-accent);
+  background: var(--color-surface-bright);
+  box-shadow: var(--shadow-glow-accent);
 }
 </style>

@@ -1,0 +1,227 @@
+/**
+ * Design Token System
+ *
+ * This stylesheet uses a systematic approach to design tokens:
+ * 1. Base tokens: Raw values (colors, sizes)
+ * 2. Semantic tokens: Purpose-based aliases
+ * 3. Component tokens: Component-specific values
+ *
+ * Token naming convention:
+ * --[category]-[property]-[variant]
+ * Examples: --color-primary, --space-lg, --font-size-base
+ */
+
+/* === Design Tokens === */
+:root {
+  /* Color Palette - Base */
+  --color-orange-500: #ff9900;
+  --color-purple-400: #cc99ff;
+  --color-blue-400: #6688ff;
+  --color-blue-600: #0099ff;
+  --color-green-500: #00ff41;
+  --color-amber-500: #ffb000;
+  --color-black-900: #000814;
+  --color-black-800: #001122;
+  --color-black-700: #001144;
+  --color-white-200: rgba(255, 255, 255, 0.2);
+  --color-white-400: rgba(255, 255, 255, 0.4);
+  --color-white-600: rgba(255, 255, 255, 0.6);
+  --color-white-800: rgba(255, 255, 255, 0.8);
+
+  /* Semantic Colors */
+  --color-primary: var(--color-orange-500);
+  --color-secondary: var(--color-blue-600);
+  --color-accent: var(--color-amber-500);
+  --color-terminal: var(--color-green-500);
+  --color-background: var(--color-black-900);
+  --color-surface: var(--color-black-800);
+  --color-surface-bright: var(--color-black-700);
+
+  /* Text Colors */
+  --text-primary: var(--color-terminal);
+  --text-secondary: var(--color-secondary);
+  --text-accent: var(--color-accent);
+  --text-on-primary: var(--color-primary);
+  --text-muted: var(--color-white-600);
+
+  /* Typography */
+  --font-family-mono: 'Courier New', monospace;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.2rem;
+  --font-size-xl: 1.5rem;
+  --font-weight-normal: 400;
+  --line-height-base: 1.6;
+  --letter-spacing-base: 0.05em;
+  --letter-spacing-wide: 0.1em;
+  --letter-spacing-wider: 0.2em;
+
+  /* Spacing Scale */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 0.75rem;
+  --space-base: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+
+  /* Borders */
+  --border-width-thin: 1px;
+  --border-width-base: 2px;
+  --border-width-thick: 4px;
+  --border-width-accent: 8px;
+  --border-radius-sm: 10px;
+
+  /* Effects */
+  --shadow-glow-primary: 0 0 20px rgba(255, 153, 0, 0.5);
+  --shadow-glow-accent: 0 0 10px rgba(255, 176, 0, 0.3);
+  --transition-base: all 0.2s;
+
+  /* Alpha Variants */
+  --color-primary-alpha-10: rgba(255, 153, 0, 0.1);
+  --color-primary-alpha-20: rgba(255, 153, 0, 0.2);
+  --color-accent-alpha-05: rgba(255, 176, 0, 0.05);
+  --color-white-alpha-10: rgba(255, 255, 255, 0.1);
+
+  /* Layout */
+  --max-width-content: 1200px;
+  --width-robot: 50vw;
+  --max-width-robot: 400px;
+  --aspect-ratio-robot: 1;
+  --aspect-ratio-canvas: 300 / 150;
+
+  /* Component-specific tokens */
+  --button-padding-base: var(--space-md) var(--space-lg);
+  --button-padding-primary: var(--space-base) var(--space-xl);
+  --button-padding-debug: var(--space-sm) var(--space-base);
+  --panel-clip-size: 20px;
+}
+
+/* === Base Reset === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family-mono);
+  background: var(--color-background);
+  color: var(--text-primary);
+  letter-spacing: var(--letter-spacing-base);
+  line-height: var(--line-height-base);
+  min-height: 100vh;
+}
+
+/* === Typography === */
+h1, h2 {
+  font-weight: var(--font-weight-normal);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wider);
+}
+
+pre {
+  font-family: inherit;
+  color: var(--text-accent);
+}
+
+/* Utility class to preserve case */
+.preserve-case {
+  text-transform: none;
+}
+
+/* === Buttons === */
+button {
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  background: var(--color-surface);
+  color: var(--text-on-primary);
+  border: var(--border-width-base) solid var(--color-primary);
+  padding: var(--button-padding-base);
+  cursor: pointer;
+  transition: var(--transition-base);
+}
+
+button:hover {
+  box-shadow: var(--shadow-glow-primary);
+  background: var(--color-primary-alpha-10);
+}
+
+button.primary {
+  border-left-width: var(--border-width-accent);
+  padding: var(--button-padding-primary);
+  font-size: var(--font-size-lg);
+  background: linear-gradient(90deg, var(--color-primary-alpha-20), transparent);
+}
+
+button.debug {
+  background: transparent;
+  border: var(--border-width-thin) solid var(--color-white-200);
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  padding: var(--button-padding-debug);
+  text-transform: none;  /* Preserve case for sound tokens */
+}
+
+button.debug:hover {
+  box-shadow: none;
+  border-color: var(--color-white-400);
+  color: var(--color-white-800);
+}
+
+/* === Panels === */
+.panel {
+  background: var(--color-surface);
+  border: var(--border-width-thin) solid var(--text-secondary);
+  padding: var(--space-base);
+  margin: var(--space-base) 0;
+  clip-path: polygon(var(--panel-clip-size) 0, 100% 0, 100% 100%, 0 100%, 0 var(--panel-clip-size));
+}
+
+.console {
+  padding: var(--space-xl);
+  max-width: var(--max-width-content);
+  margin: 0 auto;
+}
+
+/* === Header === */
+.interface-header {
+  text-align: center;
+  padding: var(--space-base) 0;
+  border-bottom: var(--border-width-base) solid var(--color-primary);
+  margin-bottom: var(--space-xl);
+}
+
+.interface-header h1 {
+  font-size: var(--font-size-xl);
+  color: var(--color-primary);
+}
+
+/* === Sections === */
+.primary-display {
+  margin: var(--space-xl) 0;
+}
+
+.control-panel {
+  text-align: center;
+  margin: var(--space-xl) 0;
+}
+
+.readout {
+  text-align: center;
+  padding: var(--space-base);
+  border: var(--border-width-thin) solid var(--color-accent);
+  border-left-width: var(--border-width-thick);
+  background: var(--color-accent-alpha-05);
+  margin: var(--space-xl) 0;
+}
+
+.diagnostics {
+  margin-top: var(--space-2xl);
+  padding-top: var(--space-xl);
+  border-top: var(--border-width-thin) solid var(--color-white-alpha-10);
+  text-align: center;
+}
