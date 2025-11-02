@@ -110,6 +110,23 @@ const replaySequence = async () => {
   }
 }
 
+const downloadWav = () => {
+  if (!lastSequenceWavDataUri.value) return
+
+  // Create a filename from the sequence string (replace spaces with dashes)
+  const sequenceSuffix = lastSequenceAsString.value.replace(/\s+/g, '-') || 'empty'
+
+  // Create a temporary link element
+  const link = document.createElement('a')
+  link.href = lastSequenceWavDataUri.value
+  link.download = `robot-${sequenceSuffix}.wav`
+
+  // Trigger the download
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
+
 const playToken = async (s: SoundToken) => {
   try {
     await soundStore.playSoundToken(s)
@@ -256,13 +273,20 @@ const playToken = async (s: SoundToken) => {
       >
         Replay
       </button>
+      <button
+        v-if="lastSequenceWavDataUri"
+        class="secondary"
+        @click="downloadWav"
+      >
+        Download
+      </button>
     </section>
 
     <section class="readout">
       <pre>{{ lastSequenceAsString || '&nbsp;' }}</pre>
     </section>
 
-    <section class="audio-export" v-if="lastSequenceWavDataUri">
+    <section class="audio-export" v-if="lastSequenceWavDataUri" style="display: none">
       <audio :src="lastSequenceWavDataUri" controls></audio>
     </section>
 
