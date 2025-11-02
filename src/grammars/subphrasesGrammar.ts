@@ -3,42 +3,16 @@ import { randint, getIdentifier, weightedChoice, choice } from './utils'
 
 interface GeneratorState {
   identifiersBySoundToken: Map<SoundToken, string[]>
-  n: number
   result: Array<RobotWord>
+  n: number
 }
 
-type ExpressionState = GeneratorState & { i: number }
+type ExpressionState = GeneratorState
 
 interface Expression {
   name: string
   getWeight: (opts: ExpressionState) => number
   generate: (opts: ExpressionState) => void
-}
-
-function repeatWordSequenceRandomNumberOfTimes<RobotWord>(
-  words: RobotWord[],
-  range: [number, number] = [1, 3],
-): RobotWord[] {
-  const result = new Array<RobotWord>()
-  const n = randint(range[0], range[1])
-  for (let i = 0; i < n; i++) {
-    // input sequence repeats
-    result.push(words[i % words.length]!)
-  }
-  return result
-}
-
-/// Generates an array of length n by repeating /// two distinct RobotWords based on the same SoundToken
-function repeatTokenVariants(s: SoundToken, n: number): RobotWord[] {
-  const id1 = getIdentifier()
-  const id2 = getIdentifier()
-  return repeatWordSequenceRandomNumberOfTimes<RobotWord>(
-    [
-      { soundToken: s, identifier: id1 },
-      { soundToken: s, identifier: id2 },
-    ],
-    [1, n],
-  )
 }
 
 export const ALL_TOKENS: SoundToken[] = ['S', 's', 'A', 'a', 'B', 'b', 'w', 'z', '_']
@@ -54,23 +28,368 @@ function getOrCreateIdentifier(state: GeneratorState, s: SoundToken): string {
   }
 }
 
+// Helper to generate a sequence with consistent identifiers for repeated tokens
+function generateSequence(state: GeneratorState, tokens: SoundToken[]): void {
+  // Track identifiers used in this sequence for consistency
+  const sequenceIdentifiers = new Map<SoundToken, string>()
+
+  for (const token of tokens) {
+    // Reuse the same identifier for repeated tokens in this sequence
+    let identifier = sequenceIdentifiers.get(token)
+    if (!identifier) {
+      identifier = getOrCreateIdentifier(state, token)
+      sequenceIdentifiers.set(token, identifier)
+    }
+
+    state.result.push({
+      soundToken: token,
+      identifier,
+    })
+  }
+}
+
 const EXPRESSIONS: Expression[] = [
+  // === CONTRAST PATTERNS ===
   {
-    name: 'SimpleRepeatingSequence',
+    name: 'UpDown',
+    getWeight: () => 1,
+    generate: (state) => generateSequence(state, ['S', 's']),
+  },
+  {
+    name: 'DownUp',
+    getWeight: () => 1,
+    generate: (state) => generateSequence(state, ['s', 'S']),
+  },
+  {
+    name: 'HighLow',
+    getWeight: () => 1,
+    generate: (state) => generateSequence(state, ['B', 'b']),
+  },
+  {
+    name: 'LowHigh',
+    getWeight: () => 1,
+    generate: (state) => generateSequence(state, ['b', 'B']),
+  },
+  {
+    name: 'ArpeggioContrast',
     getWeight: () => 1,
     generate: (state) => {
-      const tok = choice(ALL_TOKENS.slice(0, ALL_TOKENS.length - 1))
-      state.result.push(...repeatTokenVariants(tok, weightedChoice([1, 2, 3], [8, 2, 2])))
+      const pattern = choice([
+        ['A', 'a'],
+        ['a', 'A'],
+      ]) as SoundToken[]
+      generateSequence(state, pattern)
+    },
+  },
+
+  // === BUILDING PATTERNS ===
+  {
+    name: 'Ascending',
+    getWeight: () => 1,
+    generate: (state) => {
+      const pattern = choice([
+        ['b', 'b', 'B'],
+        ['b', 'b', 'b', 'B'],
+      ]) as SoundToken[]
+      generateSequence(state, pattern)
     },
   },
   {
+    name: 'Descending',
+    getWeight: () => 1,
+    generate: (state) => {
+      const pattern = choice([
+        ['B', 'B', 'b'],
+        ['B', 'B', 'B', 'b'],
+      ]) as SoundToken[]
+      generateSequence(state, pattern)
+    },
+  },
+  {
+    name: 'Pyramid',
+    getWeight: () => 1,
+    generate: (state) => {
+      const pattern = choice([
+        ['b', 'B', 'b'],
+        ['B', 'b', 'B'],
+      ]) as SoundToken[]
+      generateSequence(state, pattern)
+    },
+  },
+  {
+    name: 'Staircase',
+    getWeight: () => 1,
+    generate: (state) => generateSequence(state, ['b', 'B', 'b', 'B']),
+  },
+  {
+    name: 'Cascade',
+    getWeight: () => 1,
+    generate: (state) => generateSequence(state, ['B', 'b', 'B', 'b']),
+  },
+
+  // === RHYTHMIC PATTERNS ===
+  {
+    name: 'Stutter',
+    getWeight: () => 1,
+    generate: (state) => {
+      const token = choice(['B', 'b']) as SoundToken
+      generateSequence(state, [token, token, token])
+    },
+  },
+  {
+    name: 'Echo',
+    getWeight: () => 1,
+    generate: (state) => {
+      const pairs = choice([
+        ['B', '_', 'b'],
+        ['S', '_', 's'],
+      ]) as SoundToken[]
+      generateSequence(state, pairs)
+    },
+  },
+  {
+    name: 'Morse',
+    getWeight: () => 1,
+    generate: (state) => {
+      generateSequence(state, ['b', '_', 'b', '_', 'b', 'b', 'b'])
+    },
+  },
+  {
+    name: 'Heartbeat',
+    getWeight: () => 1,
+    generate: (state) => {
+      generateSequence(state, ['B', 'b', '_', 'B', 'b'])
+    },
+  },
+  {
+    name: 'Gallop',
+    getWeight: () => 1,
+    generate: (state) => {
+      const pattern = choice([
+        ['b', 'B', 'B'],
+        ['B', 'b', 'b'],
+      ]) as SoundToken[]
+      generateSequence(state, pattern)
+    },
+  },
+
+  // === CHARACTER PATTERNS ===
+  {
+    name: 'Question',
+    getWeight: () => 1,
+    generate: (state) => {
+      const pattern = choice([
+        ['b', 'B', 'S'],
+        ['b', 'b', 'S'],
+      ]) as SoundToken[]
+      generateSequence(state, pattern)
+    },
+  },
+  {
+    name: 'Exclamation',
+    getWeight: () => 1,
+    generate: (state) => {
+      const pattern = choice([
+        ['S', 'B', 'B'],
+        ['A', 'B', 'B'],
+      ]) as SoundToken[]
+      generateSequence(state, pattern)
+    },
+  },
+  {
+    name: 'Confusion',
+    getWeight: () => 1,
+    generate: (state) => {
+      const pattern = choice([
+        ['w', 'z', 'w'],
+        ['z', 'w', 'z'],
+      ]) as SoundToken[]
+      generateSequence(state, pattern)
+    },
+  },
+  {
+    name: 'Alarm',
+    getWeight: () => 1,
+    generate: (state) => {
+      generateSequence(state, ['B', 'b', 'B', 'b'])
+    },
+  },
+  {
+    name: 'Thinking',
+    getWeight: () => 1,
+    generate: (state) => {
+      const token = choice(['w', 'z']) as SoundToken
+      generateSequence(state, [token, token, token])
+    },
+  },
+  {
+    name: 'Celebration',
+    getWeight: () => 1,
+    generate: (state) => {
+      const pattern = choice([
+        ['A', 'B', 'A'],
+        ['S', 'B', 'S'],
+      ]) as SoundToken[]
+      generateSequence(state, pattern)
+    },
+  },
+
+  // === MUSICAL PHRASES ===
+  {
+    name: 'CallResponse',
+    getWeight: () => 1,
+    generate: (state) => {
+      generateSequence(state, ['B', 'B', '_', 'b', 'b'])
+    },
+  },
+  {
+    name: 'RisingQuestion',
+    getWeight: () => 1,
+    generate: (state) => {
+      generateSequence(state, ['b', 'a', 's', 'S'])
+    },
+  },
+  {
+    name: 'FallingAnswer',
+    getWeight: () => 1,
+    generate: (state) => {
+      generateSequence(state, ['B', 'A', 'S', 's'])
+    },
+  },
+  {
+    name: 'Interruption',
+    getWeight: () => 1,
+    generate: (state) => {
+      const pattern = choice([
+        ['w', 'w', 'B'],
+        ['z', 'z', 'S'],
+      ]) as SoundToken[]
+      generateSequence(state, pattern)
+    },
+  },
+  {
+    name: 'Resolution',
+    getWeight: () => 1,
+    generate: (state) => {
+      const pattern = choice([
+        ['w', 'b', 'B'],
+        ['z', 'a', 'A'],
+      ]) as SoundToken[]
+      generateSequence(state, pattern)
+    },
+  },
+
+  // === TEXTURE PATTERNS ===
+  {
+    name: 'SmoothToRough',
+    getWeight: () => 1,
+    generate: (state) => {
+      const pattern = choice([
+        ['S', 'z', 'z'],
+        ['A', 'w', 'w'],
+      ]) as SoundToken[]
+      generateSequence(state, pattern)
+    },
+  },
+  {
+    name: 'RoughToSmooth',
+    getWeight: () => 1,
+    generate: (state) => {
+      const pattern = choice([
+        ['z', 'z', 'S'],
+        ['w', 'w', 'A'],
+      ]) as SoundToken[]
+      generateSequence(state, pattern)
+    },
+  },
+  {
+    name: 'Alternating',
+    getWeight: () => 1,
+    generate: (state) => {
+      const pattern = choice([
+        ['B', 'w', 'B', 'w'],
+        ['S', 'z', 'S', 'z'],
+      ]) as SoundToken[]
+      generateSequence(state, pattern)
+    },
+  },
+
+  // === COMPOUND PATTERNS ===
+  {
+    name: 'Countdown',
+    getWeight: () => 1,
+    generate: (state) => {
+      generateSequence(state, ['B', 'B', 'B', 'b', 'b', 'b'])
+    },
+  },
+  {
+    name: 'Fanfare',
+    getWeight: () => 1,
+    generate: (state) => {
+      generateSequence(state, ['b', 'B', 'B', 'A'])
+    },
+  },
+  {
+    name: 'Conversation',
+    getWeight: () => 1,
+    generate: (state) => {
+      generateSequence(state, ['B', 'B', '_', 'b', '_', 'B', 'B', 'B', '_', 'b', 'b'])
+    },
+  },
+  {
+    name: 'RobotLaugh',
+    getWeight: () => 1,
+    generate: (state) => {
+      generateSequence(state, ['B', 'b', 'B', 'b', 'B', 'b'])
+    },
+  },
+  {
+    name: 'BootSequence',
+    getWeight: () => 1,
+    generate: (state) => {
+      generateSequence(state, ['b', '_', 'b', 'b', '_', 'b', 'b', 'b', '_', 'B'])
+    },
+  },
+
+  // === EMOTIONAL ARCS ===
+  {
+    name: 'Surprise',
+    getWeight: ({ result }) => (result.length > 2 ? 1 : 0), // Need room for silence at start
+    generate: (state) => {
+      generateSequence(state, ['_', '_', '_', 'B', 'S'])
+    },
+  },
+  {
+    name: 'Disappointment',
+    getWeight: () => 1,
+    generate: (state) => {
+      generateSequence(state, ['B', 'b', 's'])
+    },
+  },
+  {
+    name: 'Discovery',
+    getWeight: () => 1,
+    generate: (state) => {
+      generateSequence(state, ['w', 'w', 'w', 'A'])
+    },
+  },
+  {
+    name: 'Error',
+    getWeight: () => 1,
+    generate: (state) => {
+      generateSequence(state, ['B', 'z', 'z', 'B'])
+    },
+  },
+
+  // === Basic Wait for spacing ===
+  {
     name: 'Wait',
-    getWeight: ({ i, n, result }) => {
-      // Don't wait at start, end, or after another wait
-      if (i === 0) return 0
-      if (i === n - 1) return 0
-      if (result[i - 1]?.soundToken === '_') return 0
-      return 1
+    getWeight: ({ result, n }) => {
+      // Don't wait at start, or after another wait
+      if (result.length === 0) return 0
+      if (result.length >= n - 1) return 0
+      if (result[result.length - 1]?.soundToken === '_') return 0
+      return 40
     },
     generate: (state) => {
       state.result.push({ soundToken: '_', identifier: getOrCreateIdentifier(state, '_') })
@@ -79,7 +398,8 @@ const EXPRESSIONS: Expression[] = [
 ]
 
 export function makeBeepBoopsUsingFancyGrammarAlgorithm(): RobotWord[] {
-  const n = randint(5, 11)
+  // This is a RobotWord limit, not an expression limit
+  const n = randint(1, 15)
   const result = new Array<RobotWord>()
   const identifiersBySoundToken = new Map<SoundToken, string[]>()
 
@@ -89,13 +409,12 @@ export function makeBeepBoopsUsingFancyGrammarAlgorithm(): RobotWord[] {
     identifiersBySoundToken,
   }
 
-  for (let i = 0; i < n; i++) {
-    const expressionState = { i, ...state }
+  while (result.length < n) {
     const expr = weightedChoice(
       EXPRESSIONS,
-      EXPRESSIONS.map((e) => e.getWeight(expressionState)),
+      EXPRESSIONS.map((e) => e.getWeight(state)),
     )
-    expr.generate(expressionState)
+    expr.generate(state)
   }
 
   return result
