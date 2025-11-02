@@ -1,23 +1,18 @@
 <script setup lang="ts">
 import type { SoundToken } from '@/types/sound'
+import { usePlaybackStore } from '@/stores/playbackStore'
 
-defineProps<{
-  wavDataUri: string
-}>()
-
-const emit = defineEmits<{
-  'play-token': [token: SoundToken]
-}>()
+const playbackStore = usePlaybackStore()
 
 const playToken = (token: SoundToken) => {
-  emit('play-token', token)
+  playbackStore.playDebugToken(token)
 }
 </script>
 
 <template>
   <!-- Hidden audio element for testing WAV export -->
-  <section v-if="wavDataUri" class="audio-export" style="display: none">
-    <audio :src="wavDataUri" controls></audio>
+  <section v-if="playbackStore.currentWavDataUri" class="audio-export" style="display: none">
+    <audio :src="playbackStore.currentWavDataUri" controls></audio>
   </section>
 
   <!-- Debug buttons for testing individual sound tokens -->

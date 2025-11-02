@@ -1,6 +1,6 @@
 import Waviz from 'waviz/core'
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { sfxr, Params, type SynthParameters } from 'sfxr.js'
 import type { RobotWord, SoundToken, PlaybackToken, BakedRobotWord } from '@/types/sound'
 import { bakeToken } from '@/modules/tokenBaker'
@@ -15,9 +15,17 @@ export const useSoundStore = defineStore('sound', () => {
   const waviz = ref<Waviz | null>(null)
   const mediaStreamDest = ref<MediaStreamAudioDestinationNode | null>(null)
   const masterGain = ref<GainNode | null>(null)
+  const volume = ref(15) // Default volume at 15%
 
   // Getters
   const isReady = computed(() => isInitialized.value)
+
+  // Watch volume changes and sync to master gain
+  watch(volume, (newVolume) => {
+    if (masterGain.value) {
+      masterGain.value.gain.value = Math.max(0, Math.min(100, newVolume)) / 100
+    }
+  })
 
   // Actions
   /**
@@ -36,7 +44,7 @@ export const useSoundStore = defineStore('sound', () => {
       }
       audioContext.value = new AudioContextConstructor()
       masterGain.value = audioContext.value.createGain()
-      masterGain.value.gain.value = 0.15 // Default volume 15%
+      masterGain.value.gain.value = volume.value / 100
       mediaStreamDest.value = audioContext.value.createMediaStreamDestination()
       masterGain.value.connect(audioContext.value.destination)
       // Don't connect masterGain to mediaStreamDest - we want pre-volume signal for viz
@@ -148,21 +156,12 @@ export const useSoundStore = defineStore('sound', () => {
     return bakedSequence
   }
 
-  /**
-   * Set the master volume (0-100)
-   */
-  const setVolume = (volume: number): void => {
-    if (masterGain.value) {
-      // Convert 0-100 to 0-1
-      masterGain.value.gain.value = Math.max(0, Math.min(100, volume)) / 100
-    }
-  }
-
   return {
     // State (exposed as refs)
     audioContext,
     isInitialized,
     waviz,
+    volume,
 
     // Getters
     isReady,
@@ -175,6 +174,5 @@ export const useSoundStore = defineStore('sound', () => {
     bakeSequence,
     playSoundWithParams,
     getPlaybackToken,
-    setVolume,
   }
 })

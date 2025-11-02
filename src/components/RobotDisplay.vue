@@ -1,8 +1,24 @@
 <script setup lang="ts">
-defineProps<{
-  leftPupilTransform: string
-  rightPupilTransform: string
-}>()
+import { ref, onMounted } from 'vue'
+import { useSoundStore } from '@/stores/soundStore'
+import { useEyeTracking } from '@/composables/useEyeTracking'
+
+const soundStore = useSoundStore()
+const canvas = ref<HTMLCanvasElement>()
+
+const CANVAS_WIDTH = 300
+const CANVAS_HEIGHT = 113
+
+// Eye tracking for robot pupils
+const { leftPupilTransform, rightPupilTransform } = useEyeTracking(12)
+
+onMounted(() => {
+  if (canvas.value) {
+    canvas.value.width = CANVAS_WIDTH
+    canvas.value.height = CANVAS_HEIGHT
+    soundStore.initialize(canvas.value)
+  }
+})
 </script>
 
 <template>
@@ -107,7 +123,7 @@ defineProps<{
       </g>
     </svg>
     <div class="Robot__Mouth">
-      <slot />
+      <canvas ref="canvas"></canvas>
     </div>
   </div>
 </template>
@@ -154,5 +170,18 @@ defineProps<{
 .robot-antenna circle {
   --antenna-glow-size: 8px;
   filter: drop-shadow(0 0 var(--antenna-glow-size) var(--color-primary));
+}
+
+/* Canvas visualization */
+canvas {
+  --canvas-width: 70%;
+  position: absolute;
+  width: var(--canvas-width);
+  height: auto;
+  image-rendering: pixelated;
+  aspect-ratio: var(--aspect-ratio-canvas);
+  border: var(--border-width-base) solid var(--color-accent);
+  background: var(--color-surface-bright);
+  box-shadow: var(--shadow-glow-accent);
 }
 </style>
