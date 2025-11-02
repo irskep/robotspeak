@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useSoundStore } from '@/stores/soundStore'
-import { ramble } from './grammars/subphrasesGrammar'
+import { makeBeepBoopsUsingFancyGrammarAlgorithm } from './grammars/subphrasesGrammar'
 import type { SoundToken } from './types/sound'
 import { onMounted, ref } from 'vue'
 
@@ -15,10 +15,10 @@ onMounted(() => {
   soundStore.initialize(canvas.value!)
 })
 
-const playRamble = async () => {
+const playBeepBoops = async () => {
   soundStore.waviz?.visualizer?.simpleBars()
   soundStore.waviz?.input.initializePending()
-  const seq = ramble()
+  const seq = makeBeepBoopsUsingFancyGrammarAlgorithm()
   lastSequenceAsString.value = seq.map((w) => `${w.soundToken}${w.identifier}`).join(' ')
   soundStore.playSequence(seq)
 }
@@ -59,7 +59,7 @@ const playToken = async (s: SoundToken) => {
     </div>
 
     <div class="button-container">
-      <button @click="playRamble">Ramble</button>
+      <button @click="playBeepBoops">Make with the beep boops</button>
     </div>
 
     <div>
