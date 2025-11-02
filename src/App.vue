@@ -2,17 +2,65 @@
 import { useSoundStore } from '@/stores/soundStore'
 import { makeBeepBoopsUsingFancyGrammarAlgorithm } from './grammars/subphrasesGrammar'
 import type { SoundToken } from './types/sound'
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, computed } from 'vue'
 
 // Get sound store instance
 const soundStore = useSoundStore()
 const canvas = ref<HTMLCanvasElement>()
 const lastSequenceAsString = ref('')
 
+// Mouse tracking for eye movement
+const rawMouseX = ref(0)
+const rawMouseY = ref(0)
+const mouseX = ref(0.5) // Normalized 0-1
+const mouseY = ref(0.5) // Normalized 0-1
+let animationFrameId: number | null = null
+
+const handleMouseMove = (e: MouseEvent) => {
+  // Store raw mouse position
+  rawMouseX.value = e.clientX
+  rawMouseY.value = e.clientY
+}
+
+// Smooth animation loop for 60fps updates
+const updateEyePosition = () => {
+  // Normalize and update smooth position
+  mouseX.value = rawMouseX.value / window.innerWidth
+  mouseY.value = rawMouseY.value / window.innerHeight
+
+  animationFrameId = requestAnimationFrame(updateEyePosition)
+}
+
+// Calculate pupil offsets using simple linear interpolation
+const leftPupilTransform = computed(() => {
+  // Map mouse position to pupil movement range (-6 to 6 pixels for subtler movement)
+  const xOffset = (mouseX.value - 0.5) * 12 // -6 to 6
+  const yOffset = (mouseY.value - 0.5) * 12 // -6 to 6
+  return `translate(${xOffset}, ${yOffset})`
+})
+
+const rightPupilTransform = computed(() => {
+  // Same mapping for right eye
+  const xOffset = (mouseX.value - 0.5) * 12
+  const yOffset = (mouseY.value - 0.5) * 12
+  return `translate(${xOffset}, ${yOffset})`
+})
+
 onMounted(() => {
   canvas.value!.width = 300
-  canvas.value!.height = 150
+  canvas.value!.height = 113 // Reduced from 150 to make canvas shorter
   soundStore.initialize(canvas.value!)
+
+  // Add mouse listener and start animation loop
+  window.addEventListener('mousemove', handleMouseMove)
+  updateEyePosition() // Start the animation loop
+})
+
+onUnmounted(() => {
+  window.removeEventListener('mousemove', handleMouseMove)
+  if (animationFrameId !== null) {
+    cancelAnimationFrame(animationFrameId)
+  }
 })
 
 const playBeepBoops = async () => {
@@ -41,22 +89,104 @@ const playToken = async (s: SoundToken) => {
 
     <section class="primary-display">
       <div class="Robot">
-        <svg viewBox="-100 0 200 200">
-          <path d="M 0 50 A 80 80 0 0 130 5" stroke="blue" fill="transparent"></path>
-          <circle cx="30" cy="5" r="5" fill="blue"></circle>
-          <rect
-            x="-100"
-            y="50"
-            width="200"
-            height="150"
-            rx="10"
-            ry="10"
-            stroke-width="1"
-            stroke="blue"
-            fill="deepskyblue"
-          ></rect>
-          <circle cx="-50" cy="80" r="20" stroke="orange" fill="yellow"></circle>
-          <circle cx="50" cy="80" r="20" stroke="orange" fill="yellow"></circle>
+        <svg viewBox="-100 -10 200 210">
+          <!-- Define clip path for angular body -->
+          <defs>
+            <clipPath id="body-clip">
+              <path d="M -85 55 L 95 55 L 95 185 L 85 195 L -85 195 L -95 185 L -95 65 Z" />
+            </clipPath>
+          </defs>
+
+          <!-- Antenna with base socket -->
+          <g class="robot-antenna">
+            <!-- Antenna base/socket -->
+            <rect
+              x="-10"
+              y="40"
+              width="20"
+              height="15"
+              fill="var(--robot-detail)"
+              stroke="var(--robot-antenna)"
+              stroke-width="2"
+            />
+            <!-- Single continuous line from socket to tip -->
+            <path
+              d="M 0 40 L 0 20 Q 15 10 30 5"
+              stroke="var(--robot-antenna)"
+              stroke-width="3"
+              fill="none"
+            />
+            <!-- Antenna tip -->
+            <circle cx="30" cy="5" r="6" fill="var(--robot-antenna)" />
+          </g>
+
+          <!-- Body using path for angular corners -->
+          <path
+            d="M -85 55 L 95 55 L 95 185 L 85 195 L -85 195 L -95 185 L -95 65 Z"
+            fill="var(--robot-body)"
+            stroke="var(--robot-body-stroke)"
+            stroke-width="3"
+          />
+
+          <!-- Top panel line -->
+          <line x1="-95" y1="75" x2="95" y2="75" stroke="var(--robot-detail)" stroke-width="1" />
+
+          <!-- Eyes Group -->
+          <g class="robot-eyes">
+            <!-- Left eye outer -->
+            <circle
+              cx="-45"
+              cy="95"
+              r="22"
+              fill="var(--robot-eye)"
+              stroke="var(--robot-eye-stroke)"
+              stroke-width="3"
+            />
+            <!-- Left eye pupil -->
+            <rect
+              x="-52"
+              y="88"
+              width="14"
+              height="14"
+              fill="var(--robot-eye-stroke)"
+              :transform="leftPupilTransform"
+            />
+
+            <!-- Right eye outer -->
+            <circle
+              cx="45"
+              cy="95"
+              r="22"
+              fill="var(--robot-eye)"
+              stroke="var(--robot-eye-stroke)"
+              stroke-width="3"
+            />
+            <!-- Right eye pupil -->
+            <rect
+              x="38"
+              y="88"
+              width="14"
+              height="14"
+              fill="var(--robot-eye-stroke)"
+              :transform="rightPupilTransform"
+            />
+          </g>
+
+          <!-- Tech details -->
+          <g class="robot-details">
+            <!-- Side vents -->
+            <rect x="-90" y="85" width="8" height="3" fill="var(--robot-detail)" />
+            <rect x="-90" y="92" width="8" height="3" fill="var(--robot-detail)" />
+            <rect x="-90" y="99" width="8" height="3" fill="var(--robot-detail)" />
+
+            <rect x="82" y="85" width="8" height="3" fill="var(--robot-detail)" />
+            <rect x="82" y="92" width="8" height="3" fill="var(--robot-detail)" />
+            <rect x="82" y="99" width="8" height="3" fill="var(--robot-detail)" />
+
+            <!-- Bottom bolts -->
+            <circle cx="-75" cy="185" r="3" fill="var(--robot-detail)" />
+            <circle cx="75" cy="185" r="3" fill="var(--robot-detail)" />
+          </g>
         </svg>
         <div class="Robot__Mouth">
           <canvas ref="canvas"></canvas>
@@ -68,8 +198,8 @@ const playToken = async (s: SoundToken) => {
       <button class="primary" @click="playBeepBoops">Make with the beep boops</button>
     </section>
 
-    <section class="readout" v-if="lastSequenceAsString">
-      <pre>{{ lastSequenceAsString }}</pre>
+    <section class="readout">
+      <pre>{{ lastSequenceAsString || '&nbsp;' }}</pre>
     </section>
 
     <aside class="diagnostics">
@@ -120,5 +250,35 @@ canvas {
   border: var(--border-width-base) solid var(--color-accent);
   background: var(--color-surface-bright);
   box-shadow: var(--shadow-glow-accent);
+}
+
+/* Subtle animation for robot eyes */
+.robot-eyes circle {
+  animation: eyePulse 3s ease-in-out infinite;
+  filter: brightness(1.2); /* Always bright */
+}
+
+.robot-eyes circle:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+/* Eye tracking - no transition needed with requestAnimationFrame */
+.robot-eyes rect {
+  will-change: transform; /* Hint for GPU acceleration */
+}
+
+/* Antenna always glowing */
+.robot-antenna circle {
+  filter: drop-shadow(0 0 8px var(--color-primary));
+}
+
+@keyframes eyePulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.85;
+  }
 }
 </style>

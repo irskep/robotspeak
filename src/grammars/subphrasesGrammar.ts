@@ -1,5 +1,5 @@
 import type { RobotWord, SoundToken } from '@/types/sound'
-import { randint, getIdentifier, weightedChoice, choice } from './utils'
+import { randint, getIdentifier, weightedChoice, choice, resetIdentifiers } from './utils'
 
 interface GeneratorState {
   identifiersBySoundToken: Map<SoundToken, string[]>
@@ -398,6 +398,7 @@ const EXPRESSIONS: Expression[] = [
 ]
 
 export function makeBeepBoopsUsingFancyGrammarAlgorithm(): RobotWord[] {
+  resetIdentifiers()
   // This is a RobotWord limit, not an expression limit
   const n = randint(1, 15)
   const result = new Array<RobotWord>()

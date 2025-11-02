@@ -89,13 +89,21 @@
   --width-robot: 50vw;
   --max-width-robot: 400px;
   --aspect-ratio-robot: 1;
-  --aspect-ratio-canvas: 300 / 150;
+  --aspect-ratio-canvas: 300 / 113;  /* Shorter canvas - was 300/150, now ~75% height */
 
   /* Component-specific tokens */
   --button-padding-base: var(--space-md) var(--space-lg);
   --button-padding-primary: var(--space-base) var(--space-xl);
   --button-padding-debug: var(--space-sm) var(--space-base);
   --panel-clip-size: 20px;
+
+  /* Robot SVG Colors */
+  --robot-body: var(--color-blue-400);
+  --robot-body-stroke: var(--color-blue-600);
+  --robot-eye: var(--color-amber-500);
+  --robot-eye-stroke: var(--color-orange-500);
+  --robot-antenna: var(--color-primary);
+  --robot-detail: var(--color-white-400);
 }
 
 /* === Base Reset === */
@@ -212,11 +220,16 @@ button.debug:hover {
 
 .readout {
   text-align: center;
-  padding: var(--space-base);
-  border: var(--border-width-thin) solid var(--color-accent);
-  border-left-width: var(--border-width-thick);
-  background: var(--color-accent-alpha-05);
-  margin: var(--space-xl) 0;
+  padding: var(--space-sm);
+  border: none;
+  background: transparent;
+  margin: var(--space-lg) 0;
+  opacity: 0.5;
+  font-size: var(--font-size-xs);
+}
+
+.readout pre {
+  color: var(--color-white-400); /* Gray text instead of accent color */
 }
 
 .diagnostics {

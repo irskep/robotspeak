@@ -43,3 +43,7 @@ let nextId = 1
 export function getIdentifier(): string {
   return `${nextId++}`
 }
+
+export function resetIdentifiers() {
+  nextId = 1
+}
