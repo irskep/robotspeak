@@ -17,15 +17,16 @@ export const usePlaybackStore = defineStore('playback', () => {
   const currentSequence = ref<RobotWord[]>([])
   const currentBaked = ref<BakedRobotWord[]>([])
   const currentWavDataUri = ref<string>('')
+  const isPlaying = ref(false)
 
   // Computed properties
   const sequenceAsString = computed(() =>
     currentSequence.value.map((w) => `${w.soundToken}${w.identifier}`).join(' '),
   )
 
-  const canReplay = computed(() => currentBaked.value.length > 0)
+  const canReplay = computed(() => currentBaked.value.length > 0 && !isPlaying.value)
 
-  const canDownload = computed(() => currentWavDataUri.value !== '')
+  const canDownload = computed(() => currentWavDataUri.value !== '' && !isPlaying.value)
 
   // Actions
 
@@ -33,22 +34,27 @@ export const usePlaybackStore = defineStore('playback', () => {
    * Generate and play a new robot sound sequence
    */
   const playNew = async (): Promise<void> => {
-    soundStore.resetVisualization()
+    isPlaying.value = true
+    try {
+      soundStore.resetVisualization()
 
-    const seq = makeBeepBoopsUsingFancyGrammarAlgorithm()
-    currentSequence.value = seq
+      const seq = makeBeepBoopsUsingFancyGrammarAlgorithm()
+      currentSequence.value = seq
 
-    // Bake the sequence
-    const bakedSeq = await bakeSequence(seq)
-    currentBaked.value = bakedSeq
+      // Bake the sequence
+      const bakedSeq = await bakeSequence(seq)
+      currentBaked.value = bakedSeq
 
-    // Play the baked sequence
-    for (const bakedWord of bakedSeq) {
-      await soundStore.playToken(bakedWord.playbackToken)
+      // Play the baked sequence
+      for (const bakedWord of bakedSeq) {
+        await soundStore.playToken(bakedWord.playbackToken)
+      }
+
+      // Generate WAV file for the baked sequence
+      currentWavDataUri.value = await sequenceToWav(bakedSeq)
+    } finally {
+      isPlaying.value = false
     }
-
-    // Generate WAV file for the baked sequence
-    currentWavDataUri.value = await sequenceToWav(bakedSeq)
   }
 
   /**
@@ -57,11 +63,16 @@ export const usePlaybackStore = defineStore('playback', () => {
   const replay = async (): Promise<void> => {
     if (currentBaked.value.length === 0) return
 
-    soundStore.resetVisualization()
+    isPlaying.value = true
+    try {
+      soundStore.resetVisualization()
 
-    // Replay the already baked sequence
-    for (const bakedWord of currentBaked.value) {
-      await soundStore.playToken(bakedWord.playbackToken)
+      // Replay the already baked sequence
+      for (const bakedWord of currentBaked.value) {
+        await soundStore.playToken(bakedWord.playbackToken)
+      }
+    } finally {
+      isPlaying.value = false
     }
   }
 
@@ -102,6 +113,7 @@ export const usePlaybackStore = defineStore('playback', () => {
     currentSequence,
     currentBaked,
     currentWavDataUri,
+    isPlaying,
 
     // Computed
     sequenceAsString,
