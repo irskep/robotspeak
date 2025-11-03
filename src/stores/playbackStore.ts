@@ -4,6 +4,7 @@ import type { RobotWord, BakedRobotWord, SoundToken } from '@/types/sound'
 import { useSoundStore } from '@/stores/soundStore'
 import { makeBeepBoopsUsingFancyGrammarAlgorithm } from '@/grammars/subphrasesGrammar'
 import { sequenceToWav } from '@/modules/sequenceToWav'
+import { bakeSequence } from '@/modules/sequenceBaker'
 
 /**
  * Playback store for managing application-level playback state
@@ -32,15 +33,19 @@ export const usePlaybackStore = defineStore('playback', () => {
    * Generate and play a new robot sound sequence
    */
   const playNew = async (): Promise<void> => {
-    soundStore.waviz?.visualizer?.simpleLine()
-    soundStore.waviz?.input.initializePending()
+    soundStore.resetVisualization()
 
     const seq = makeBeepBoopsUsingFancyGrammarAlgorithm()
     currentSequence.value = seq
 
-    // Play the sequence and get the baked version
-    const bakedSeq = await soundStore.playSequence(seq)
+    // Bake the sequence
+    const bakedSeq = await bakeSequence(seq)
     currentBaked.value = bakedSeq
+
+    // Play the baked sequence
+    for (const bakedWord of bakedSeq) {
+      await soundStore.playToken(bakedWord.playbackToken)
+    }
 
     // Generate WAV file for the baked sequence
     currentWavDataUri.value = await sequenceToWav(bakedSeq)
@@ -52,12 +57,11 @@ export const usePlaybackStore = defineStore('playback', () => {
   const replay = async (): Promise<void> => {
     if (currentBaked.value.length === 0) return
 
-    soundStore.waviz?.visualizer?.simpleLine()
-    soundStore.waviz?.input.initializePending()
+    soundStore.resetVisualization()
 
     // Replay the already baked sequence
     for (const bakedWord of currentBaked.value) {
-      await soundStore.playPlaybackToken(bakedWord.playbackToken)
+      await soundStore.playToken(bakedWord.playbackToken)
     }
   }
 

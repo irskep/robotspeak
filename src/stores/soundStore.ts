@@ -2,11 +2,11 @@ import Waviz from 'waviz/core'
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { sfxr, Params, type SynthParameters } from 'sfxr.js'
-import type { RobotWord, SoundToken, PlaybackToken, BakedRobotWord } from '@/types/sound'
+import type { SoundToken, PlaybackToken } from '@/types/sound'
 import { bakeToken } from '@/modules/tokenBaker'
 
 /**
- * Sound store for managing audio context and sound generation
+ * Sound store for managing low-level audio context and sound generation
  */
 export const useSoundStore = defineStore('sound', () => {
   // State
@@ -57,26 +57,16 @@ export const useSoundStore = defineStore('sound', () => {
     }
   }
 
-  const getPlaybackToken = async (token: SoundToken): Promise<PlaybackToken> => {
-    return bakeToken(token)
-  }
-
   /**
-   * Play a sound based on a token (generates fresh instance)
+   * Play a sound based on a PlaybackToken
    */
-  const playPlaybackToken = async (token: PlaybackToken): Promise<void> => {
-    // Auto-initialize on first play attempt
+  const playToken = async (token: PlaybackToken): Promise<void> => {
     if (!isInitialized.value) {
       throw new Error('Not initialized')
     }
 
     if (token.kind === 'BakedToken') {
-      try {
-        await playSoundWithParams(token.params)
-      } catch (error) {
-        console.error(`Failed to play token ${token}:`, error)
-        throw error
-      }
+      await playSoundWithParams(token.params)
     } else if (token.kind === 'WaitToken') {
       await new Promise((resolve) => {
         setTimeout(resolve, token.durationMs)
@@ -84,95 +74,68 @@ export const useSoundStore = defineStore('sound', () => {
     }
   }
 
-  const playSoundToken = async (token: SoundToken) => playPlaybackToken(await bakeToken(token))
+  /**
+   * Convenience method: bake and play a SoundToken in one call
+   */
+  const playSoundToken = async (token: SoundToken): Promise<void> => {
+    const playbackToken = await bakeToken(token)
+    await playToken(playbackToken)
+  }
 
   /**
-   * Play a sound with specific parameters
+   * Play a sound with specific parameters (low-level primitive)
    */
   const playSoundWithParams = async (params: Partial<SynthParameters>): Promise<void> => {
     if (!audioContext.value) {
       throw new Error('Audio context not initialized')
     }
 
-    try {
-      // Create a new Params object with defaults
-      const sfxrParams = new Params()
+    // Create a new Params object with defaults
+    const sfxrParams = new Params()
 
-      // Override with our custom params
-      Object.assign(sfxrParams, params)
+    // Override with our custom params
+    Object.assign(sfxrParams, params)
 
-      // Use sfxr's toWebAudio helper to create an AudioBufferSourceNode
-      const source = sfxr.toWebAudio(sfxrParams, audioContext.value)
+    // Use sfxr's toWebAudio helper to create an AudioBufferSourceNode
+    const source = sfxr.toWebAudio(sfxrParams, audioContext.value)
 
-      if (source && masterGain.value) {
-        // Connect the source through the master gain for audio output
-        source.connect(masterGain.value)
-        // Also connect directly to mediaStreamDest for pre-volume visualization
-        if (mediaStreamDest.value) {
-          source.connect(mediaStreamDest.value)
-        }
-        // Start playing the sound
-        source.start(0)
-
-        return new Promise((resolve) => (source.onended = () => resolve()))
-      }
-    } catch (error) {
-      console.error('Error playing sound:', error)
-      throw error
+    if (!source) {
+      throw new Error('Failed to create audio source')
     }
+
+    if (!masterGain.value) {
+      throw new Error('Master gain not initialized')
+    }
+
+    // Connect the source through the master gain for audio output
+    source.connect(masterGain.value)
+    // Also connect directly to mediaStreamDest for pre-volume visualization
+    if (mediaStreamDest.value) {
+      source.connect(mediaStreamDest.value)
+    }
+    // Start playing the sound
+    source.start(0)
+
+    return new Promise((resolve) => (source.onended = () => resolve()))
   }
 
   /**
-   * Bake a sequence of RobotWords into BakedRobotWords
-   * Ensures consistent PlaybackTokens for the same identifier
+   * Reset visualization to initial state
    */
-  const bakeSequence = async (words: RobotWord[]): Promise<BakedRobotWord[]> => {
-    const playbackTokensByRobotWordId = new Map<string, PlaybackToken>()
-    const bakedSequence: BakedRobotWord[] = []
-
-    for (const word of words) {
-      const rwid = `${word.soundToken}${word.identifier}`
-      if (!playbackTokensByRobotWordId.has(rwid)) {
-        playbackTokensByRobotWordId.set(rwid, await bakeToken(word.soundToken))
-      }
-      bakedSequence.push({
-        soundToken: word.soundToken,
-        identifier: word.identifier,
-        playbackToken: playbackTokensByRobotWordId.get(rwid)!,
-      })
-    }
-
-    return bakedSequence
-  }
-
-  const playSequence = async (words: RobotWord[]): Promise<BakedRobotWord[]> => {
-    console.log('Playing sequence:', JSON.stringify(words))
-    const bakedSequence = await bakeSequence(words)
-
-    for (const bakedWord of bakedSequence) {
-      await playPlaybackToken(bakedWord.playbackToken)
-    }
-
-    return bakedSequence
+  const resetVisualization = (): void => {
+    waviz.value?.visualizer?.simpleLine()
+    waviz.value?.input.initializePending()
   }
 
   return {
-    // State (exposed as refs)
-    audioContext,
-    isInitialized,
-    waviz,
+    // Public state
     volume,
-
-    // Getters
     isReady,
 
     // Actions
     initialize,
-    playPlaybackToken,
+    playToken,
     playSoundToken,
-    playSequence,
-    bakeSequence,
-    playSoundWithParams,
-    getPlaybackToken,
+    resetVisualization,
   }
 })
